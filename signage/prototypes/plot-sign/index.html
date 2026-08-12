@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A printable A5 sign for any plot: number, keeper, crops and the rota, in Fulla's hand.">
+<title>Fulla · Plot sign</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) 16rem; gap: var(--fulla-s5); align-items: start; }
+  .sign {
+    background: var(--fulla-white); border: 3px solid var(--fulla-ink);
+    border-radius: var(--fulla-wobble); box-shadow: var(--fulla-shadow-lg);
+    padding: var(--fulla-s6); max-width: 26rem; margin: 0 auto; text-align: center;
+    aspect-ratio: 148 / 210; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .sign .num { font-family: var(--fulla-font-display); font-weight: 800; font-size: 5.5rem; line-height: 1; color: var(--fulla-green-deep); }
+  .sign .plot-name { font-family: var(--fulla-font-display); font-size: var(--fulla-text-xl); color: var(--fulla-ink); }
+  .sign hr { border: none; border-top: 2px dashed var(--fulla-ink-faint); margin: var(--fulla-s3) 0; }
+  @media (max-width: 760px) { .stage { grid-template-columns: 1fr; } }
+  @media print {
+    body * { visibility: hidden; }
+    .sign, .sign * { visibility: visible; }
+    .sign { position: fixed; inset: 0; margin: auto; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<main class="f-page">
+  <h1>Plot sign</h1>
+  <p class="f-muted">Pick a plot, print it A5, laminate it, done. The kids do the laminating.</p>
+  <div class="stage">
+    <div class="sign" id="sign">
+      <div class="f-logo">fulla<span class="f-leaf">🌿</span></div>
+      <div>
+        <div class="num" id="s-num">23</div>
+        <div class="plot-name" id="s-name">Marta's Tomatoes</div>
+      </div>
+      <div>
+        <hr>
+        <p id="s-crops"><span class="f-chip f-chip--green">tomatoes</span> <span class="f-chip">basil</span></p>
+        <p class="f-muted" id="s-keeper">kept by Marta · watered on the Tuesday rota</p>
+        <small class="f-faint">Hort de la Riera</small>
+      </div>
+    </div>
+    <div class="f-col">
+      <div class="f-card">
+        <h4>Which plot?</h4>
+        <wired-combo id="pick" selected="p23">
+          <wired-item value="p7">7 · The Fava Beds</wired-item>
+          <wired-item value="p12">12 · The Dry Corner</wired-item>
+          <wired-item value="p23">23 · Marta's Tomatoes</wired-item>
+          <wired-item value="p31">31 · The Herb Corner</wired-item>
+          <wired-item value="p40">40 · The New Bed</wired-item>
+        </wired-combo>
+        <div style="margin-top: var(--fulla-s4)">
+          <wired-button class="f-primary" elevation="2" id="print">Print it</wired-button>
+        </div>
+      </div>
+      <div class="f-sticky">Rain fades normal ink in a month. Laminate or regret.</div>
+    </div>
+  </div>
+</main>
+<script>
+(function () {
+  var PLOTS = {
+    p7:  { num: "7",  name: "The Fava Beds", crops: ["fava beans", "spinach"], keeper: "kept by Toni · watered on the Monday rota" },
+    p12: { num: "12", name: "The Dry Corner", crops: ["chard"], keeper: "kept by Íngrid · covered by Pau this week" },
+    p23: { num: "23", name: "Marta's Tomatoes", crops: ["tomatoes", "basil"], keeper: "kept by Marta · watered on the Tuesday rota" },
+    p31: { num: "31", name: "The Herb Corner", crops: ["rosemary", "thyme", "mint"], keeper: "communal · water on Saturdays" },
+    p40: { num: "40", name: "The New Bed", crops: ["fava beans (sowing Saturday)"], keeper: "communal · the new bed" },
+  };
+  function show(id) {
+    var p = PLOTS[id];
+    document.getElementById("s-num").textContent = p.num;
+    document.getElementById("s-name").textContent = p.name;
+    document.getElementById("s-crops").innerHTML = p.crops.map(function (c, i) {
+      return '<span class="f-chip' + (i === 0 ? " f-chip--green" : "") + '">' + c + "</span>";
+    }).join(" ");
+    document.getElementById("s-keeper").textContent = p.keeper;
+  }
+  document.getElementById("pick").addEventListener("selected", function (e) { show(e.detail.selected); });
+  document.getElementById("print").addEventListener("click", function () { window.print(); });
+})();
+</script>
+</body>
+</html>

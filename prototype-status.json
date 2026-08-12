@@ -3,5 +3,7 @@
   "garden/coordinator-dashboard": "dev-ready",
   "garden/plot-care": "dev-ready",
   "garden/garden-map": "in-progress",
-  "garden/seed-pod-3d": "dev-ready"
+  "garden/seed-pod-3d": "dev-ready",
+  "almanac/sowing-wheel": "dev-ready",
+  "signage/plot-sign": "in-progress"
 }
