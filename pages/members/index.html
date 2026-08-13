@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A composed reference page: the members list with plots, rota days and states.">
+<title>Members — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<script src="../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  .avatar { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 2px solid var(--fulla-ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--fulla-font-display); font-weight: 700; color: var(--fulla-white); flex: none; }
+</style>
+</head>
+<body>
+<div class="f-app">
+  <aside class="f-sidebar">
+    <div class="f-logo">fulla<span class="f-leaf">🌿</span></div>
+    <a class="f-navlink" href="#">Overview</a>
+    <a class="f-navlink" href="#">Plots</a>
+    <a class="f-navlink" href="#">Rota</a>
+    <a class="f-navlink" href="#">Harvest</a>
+    <a class="f-navlink is-active" href="#">Members</a>
+    <div class="f-grow"></div>
+    <small class="f-faint">Hort de la Riera</small>
+  </aside>
+  <main class="f-main">
+    <div class="f-row f-between f-wrap">
+      <div><h1>Members</h1><p class="f-muted">61 people, 48 plots, one garden.</p></div>
+      <div class="f-row"><wired-search-input placeholder="Find someone"></wired-search-input><wired-button class="f-primary">Invite</wired-button></div>
+    </div>
+    <div class="f-card">
+      <table class="f-table">
+        <thead><tr><th></th><th>Member</th><th>Plot</th><th>Rota</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td><span class="avatar" style="background:#35593f">N</span></td><td>Núria</td><td>3</td><td>coordinates</td><td><span class="f-chip f-chip--green">active</span></td></tr>
+          <tr><td><span class="avatar" style="background:#7da7c4">P</span></td><td>Pau</td><td>7 · The Fava Beds</td><td>Monday</td><td><span class="f-chip f-chip--green">active</span></td></tr>
+          <tr><td><span class="avatar" style="background:#a54657">M</span></td><td>Marta</td><td>23 · Marta's Tomatoes</td><td>Tuesday</td><td><span class="f-chip f-chip--green">active</span></td></tr>
+          <tr><td><span class="avatar" style="background:#e6aa3a">O</span></td><td>Omar</td><td>34</td><td>Wednesday</td><td><span class="f-chip f-chip--green">active</span></td></tr>
+          <tr><td><span class="avatar" style="background:#c17a56">J</span></td><td>Joana</td><td>18</td><td>Thursday</td><td><span class="f-chip f-chip--green">active</span></td></tr>
+          <tr><td><span class="avatar" style="background:#8d998f">G</span></td><td>Greta</td><td>41</td><td>Friday</td><td><span class="f-chip f-chip--sun">quiet lately</span></td></tr>
+          <tr><td><span class="avatar" style="background:#8d998f">Í</span></td><td>Íngrid</td><td>12 · The Dry Corner</td><td>traveling</td><td><span class="f-chip f-chip--berry">needs cover</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

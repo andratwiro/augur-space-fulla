@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The notice stack: titled rows with a state chip, a body line and one action, dash-separated.">
+<title>Notice stack — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<script src="../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  .notice { padding: var(--fulla-s4) 0; border-bottom: 2px dashed var(--fulla-ink-faint); }
+  .notice:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<main class="f-page" style="max-width: 46rem">
+  <h1>Notice stack</h1>
+  <p class="f-muted">How the garden talks about what needs doing. A title, a state chip, one plain sentence, at most one action.</p>
+  <div class="f-card">
+    <div class="notice">
+      <div class="f-row f-between f-wrap">
+        <h4 style="margin:0">Plot 12 · The Dry Corner <span class="f-chip f-chip--berry">3 missed waterings</span></h4>
+        <wired-button class="f-primary">Assign cover</wired-button>
+      </div>
+      <p class="f-muted" style="margin: var(--fulla-s2) 0 0">The owner is traveling until next week and the chard is starting to sulk.</p>
+    </div>
+    <div class="notice">
+      <h4 style="margin:0">Compost bay 2 <span class="f-chip f-chip--green">ready</span></h4>
+      <p class="f-muted" style="margin: var(--fulla-s2) 0 0">Ready to spread. The wheelbarrows are parked by the riera tap.</p>
+    </div>
+    <div class="notice">
+      <h4 style="margin:0">Fava sowing day <span class="f-chip f-chip--sun">Saturday</span></h4>
+      <p class="f-muted" style="margin: var(--fulla-s2) 0 0">Communal morning at The Fava Beds. Seeds are already waiting in the shed.</p>
+    </div>
+  </div>
+</main>
+</body>
+</html>

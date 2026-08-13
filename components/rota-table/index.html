@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The hand-ruled table: dashed row lines, a highlighted today, chips in cells.">
+<title>Rota table — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<style>
+  .is-today td { background: var(--fulla-paper-2); font-weight: 700; }
+</style>
+</head>
+<body>
+<main class="f-page" style="max-width: 42rem">
+  <h1>Rota table</h1>
+  <p class="f-muted">`.f-table` rules rows with dashes and keeps headers in the display hand. Highlight a row by giving it a paper background.</p>
+  <div class="f-card">
+    <table class="f-table">
+      <thead><tr><th>Day</th><th>Waterer</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Monday</td><td>Pau</td><td><span class="f-chip f-chip--sky">both taps</span></td></tr>
+        <tr><td>Tuesday</td><td>Marta</td><td></td></tr>
+        <tr class="is-today"><td>Wednesday</td><td>Omar</td><td><span class="f-chip f-chip--sun">today</span></td></tr>
+        <tr><td>Thursday</td><td>Joana</td><td></td></tr>
+        <tr><td>Saturday</td><td>Everyone</td><td><span class="f-chip f-chip--green">sowing day</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

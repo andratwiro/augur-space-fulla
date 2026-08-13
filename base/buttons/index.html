@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fulla's controls: wired buttons, toggles, checkboxes and inputs in the garden palette.">
+<title>Buttons and controls — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<script src="../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  .demo-row { display: grid; grid-template-columns: 11rem 1fr; gap: var(--fulla-s4); align-items: center; padding: var(--fulla-s4) 0; border-bottom: 1px dashed var(--fulla-ink-faint); }
+  .demo-row code { font-size: var(--fulla-text-xs); color: var(--fulla-ink-soft); }
+</style>
+</head>
+<body>
+<main class="f-page">
+  <h1>Buttons and controls</h1>
+  <p class="f-muted">Everything interactive is a wired element. Strokes follow the CSS color, so variants are one class.</p>
+  <div class="demo-row"><code>wired-button</code><div class="f-row f-wrap">
+    <wired-button>Plain</wired-button>
+    <wired-button class="f-primary" elevation="2">Primary</wired-button>
+    <wired-button class="f-secondary">Secondary</wired-button>
+    <wired-button class="f-danger">Careful</wired-button>
+    <wired-button disabled>Resting</wired-button>
+  </div></div>
+  <div class="demo-row"><code>wired-toggle</code><div class="f-row"><wired-toggle checked></wired-toggle><wired-toggle></wired-toggle><small class="f-muted">watered / not yet</small></div></div>
+  <div class="demo-row"><code>wired-checkbox</code><div class="f-col" style="gap: var(--fulla-s2)">
+    <wired-checkbox checked>Communal beds, north tap</wired-checkbox>
+    <wired-checkbox>Your plot, deep soak</wired-checkbox>
+  </div></div>
+  <div class="demo-row"><code>wired-input</code><div class="f-row f-wrap">
+    <wired-input placeholder="Search plots"></wired-input>
+    <wired-slider value="40" style="width: 10rem"></wired-slider>
+  </div></div>
+  <div class="demo-row"><code>wired-combo</code><wired-combo selected="tom" style="max-width: 14rem">
+    <wired-item value="tom">Tomatoes</wired-item>
+    <wired-item value="fav">Fava beans</wired-item>
+    <wired-item value="zuc">Zucchini</wired-item>
+  </wired-combo></div>
+</main>
+</body>
+</html>
