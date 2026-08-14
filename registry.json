@@ -7,7 +7,7 @@
         "f-stat"
       ],
       "label": "Stat",
-      "description": "A big hand-written number with a quiet label underneath."
+      "description": "A big hand-written number with a quiet label underneath. Counts the harvest, the plots, the seeds."
     },
     {
       "name": "chip",
@@ -16,7 +16,7 @@
         "f-chip"
       ],
       "label": "Chip",
-      "description": "Small inked tag for states and crops; color variants for green, sun, clay, berry and sky."
+      "description": "Small inked tag for states and crops; green, sun, clay, berry and sky. Six of seven screens wear them."
     },
     {
       "name": "bar",
@@ -34,7 +34,7 @@
         "f-sticky"
       ],
       "label": "Sticky note",
-      "description": "A yellow paper note, slightly tilted, same family as the review stickies."
+      "description": "A yellow paper note, slightly tilted, same family as the review stickies. Five screens keep one pinned."
     },
     {
       "name": "wordmark",
@@ -52,7 +52,7 @@
         "f-card"
       ],
       "label": "Paper card",
-      "description": "The main surface: white paper, wobbly inked border, soft paper shadow."
+      "description": "The main surface: white paper, wobbly inked border, soft paper shadow. Every screen in the space deals these — the dashboard, the seed swap, the plot signs."
     },
     {
       "name": "rota-table",
@@ -61,7 +61,7 @@
         "f-table"
       ],
       "label": "Table",
-      "description": "Hand-ruled table with dashed row lines; rotas and lists."
+      "description": "Hand-ruled table with dashed row lines. Runs the dashboard's watering rota; any list that needs keeping."
     },
     {
       "name": "navlink",
@@ -70,7 +70,7 @@
         "f-navlink"
       ],
       "label": "Nav link",
-      "description": "Sidebar navigation entry; the active one gets ink and a shadow."
+      "description": "The rail link: quiet ink until it stands up. Steers the coordinator dashboard."
     },
     {
       "name": "tabbar",
@@ -79,7 +79,7 @@
         "f-tabbar"
       ],
       "label": "Tab bar",
-      "description": "Bottom navigation for the phone frame."
+      "description": "Three tabs at thumb height. The member app lives under it — Today, My plot, Harvest."
     },
     {
       "name": "app-frame",
