@@ -15,8 +15,8 @@ Catalan town. 48 plots, 61 members, 9 people on the waitlist.
 
 - **Coordinator:** Núria (the dashboard's user)
 - **Members seen in demos:** Pau, Marta, Joana, Omar, Greta, Íngrid, Toni, Assumpta
-- **Plots:** numbered 1–48. Named plots for flavor: 7 "Les Faves", 12 "El Secà",
-  23 "Tomàquets de la Marta", 31 "Racó de les Herbes", 40 "Bancal Nou"
+- **Plots:** numbered 1–48. Named plots for flavor: 7 "The Fava Beds", 12 "The Dry Corner",
+  23 "Marta's Tomatoes", 31 "The Herb Corner", 40 "The New Bed"
 - **Water points:** 2 (north tap, riera tap) · **Compost:** 3 bays, bay 2 "ready"
 - **This week's drama:** plot 12 has missed 3 waterings (owner traveling),
   bay 2 compost is ready to distribute, Saturday is the fava bean sowing day
@@ -27,8 +27,8 @@ Catalan town. 48 plots, 61 members, 9 people on the waitlist.
 
 ## Voice
 
-Informal, warm, designer-to-designer. Catalan garden vocabulary is welcome in
-data (plot names, crops); UI copy stays English. No marketing words, no em
+Informal, warm, designer-to-designer. Everything reads in English; Catalan
+survives only in proper names (people, Hort de la Riera). No marketing words, no em
 dashes, no "X: a, b, c" triads, no aphorisms.
 
 ## Design system

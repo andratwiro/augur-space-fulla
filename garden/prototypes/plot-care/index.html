@@ -153,7 +153,7 @@
     <!-- ── TODAY ─────────────────────────────────────────────── -->
     <section class="screen is-active" id="screen-today">
       <div class="screen-head">
-        <h3>Hola, Marta</h3>
+        <h3>Hi, Marta</h3>
         <div class="f-row f-wrap" style="gap: var(--fulla-s2);">
           <small>Tuesday 6 October</small>
           <span class="f-chip f-chip--sky">💧 your rota day</span>
@@ -173,11 +173,11 @@
         </div>
         <div class="task" data-task>
           <wired-checkbox>Communal beds · riera tap</wired-checkbox>
-          <p class="task-sub">Give Racó de les Herbes a light pass too.</p>
+          <p class="task-sub">Give The Herb Corner a light pass too.</p>
           <span class="task-done-note">done 💧</span>
         </div>
         <div class="task" data-task>
-          <wired-checkbox>Your plot · Tomàquets de la Marta</wired-checkbox>
+          <wired-checkbox>Your plot · Marta's Tomatoes</wired-checkbox>
           <p class="task-sub">Deep soak, the week has been dry.</p>
           <span class="task-done-note">done 💧</span>
         </div>
@@ -199,7 +199,7 @@
 
       <div class="f-card notice">
         <div class="f-row f-between">
-          <span class="notice-title">🫘 Fava sowing at Bancal Nou</span>
+          <span class="notice-title">🫘 Fava sowing at The New Bed</span>
           <span class="f-chip f-chip--sun">Saturday</span>
         </div>
         <p>Communal morning from 9. Bring gloves if you have them.</p>
@@ -207,7 +207,7 @@
 
       <div class="f-card notice" id="help-notice">
         <div class="f-row f-between">
-          <span class="notice-title">🍂 Plot 12 · El Secà needs a cover</span>
+          <span class="notice-title">🍂 Plot 12 · The Dry Corner needs a cover</span>
           <span class="f-chip f-chip--clay" id="help-chip">needs a hand</span>
         </div>
         <p>The owner is traveling and it has missed three waterings. A shade cover this week would save the chard.</p>
@@ -221,9 +221,9 @@
       <div class="screen-head">
         <h3>Plot 23</h3>
         <div class="f-row f-wrap" style="gap: var(--fulla-s2);">
-          <small>Tomàquets de la Marta</small>
-          <span class="f-chip f-chip--green">🍅 tomàquets</span>
-          <span class="f-chip">🌿 alfàbrega</span>
+          <small>Marta's Tomatoes</small>
+          <span class="f-chip f-chip--green">🍅 tomatoes</span>
+          <span class="f-chip">🌿 basil</span>
           <span class="f-chip f-chip--sky">riera tap</span>
         </div>
       </div>
@@ -266,12 +266,12 @@
       <div class="f-card gap-below">
         <h4>Log a harvest</h4>
         <wired-combo id="crop-combo" selected="tomaquets">
-          <wired-item value="tomaquets">Tomàquets</wired-item>
-          <wired-item value="alfabrega">Alfàbrega</wired-item>
-          <wired-item value="carbassons">Carbassons</wired-item>
-          <wired-item value="faves">Faves</wired-item>
-          <wired-item value="bledes">Bledes</wired-item>
-          <wired-item value="herbes">Herbes</wired-item>
+          <wired-item value="tomaquets">Tomatoes</wired-item>
+          <wired-item value="alfabrega">Basil</wired-item>
+          <wired-item value="zucchini">Zucchini</wired-item>
+          <wired-item value="fava beans">Fava beans</wired-item>
+          <wired-item value="chard">Chard</wired-item>
+          <wired-item value="herbs">Herbs</wired-item>
         </wired-combo>
         <div class="hform-row">
           <wired-input id="kg-input" type="number" min="0" step="0.1" placeholder="kg"></wired-input>
@@ -283,8 +283,8 @@
       <div class="f-card">
         <h4>This season</h4>
         <ul class="hlist" id="season-list">
-          <li><span>🍅</span><span class="h-crop">Tomàquets</span><span class="h-kg">12.4 kg</span><span class="h-when">so far</span></li>
-          <li><span>🌿</span><span class="h-crop">Alfàbrega</span><span class="h-kg">0.8 kg</span><span class="h-when">so far</span></li>
+          <li><span>🍅</span><span class="h-crop">Tomatoes</span><span class="h-kg">12.4 kg</span><span class="h-when">so far</span></li>
+          <li><span>🌿</span><span class="h-crop">Basil</span><span class="h-kg">0.8 kg</span><span class="h-when">so far</span></li>
         </ul>
       </div>
     </section>
@@ -370,7 +370,7 @@
   });
 
   /* ── My plot: notes ── */
-  var SAVED_NOTE = 'Staked the second row of tomàquets. Pinch the alfàbrega ' +
+  var SAVED_NOTE = 'Staked the second row of tomatoes. Pinch the basil ' +
     'before it flowers. Ask Núria for a scoop of bay 2 compost.';
   var notesEl = document.getElementById('plot-notes');
   var notesSaved = document.getElementById('notes-saved');
@@ -392,14 +392,14 @@
 
   /* ── Harvest: log form + in-memory season list ── */
   var CROPS = {
-    tomaquets: { label: 'Tomàquets', emoji: '🍅' },
-    alfabrega: { label: 'Alfàbrega', emoji: '🌿' },
-    carbassons: { label: 'Carbassons', emoji: '🥒' },
-    faves: { label: 'Faves', emoji: '🫘' },
-    bledes: { label: 'Bledes', emoji: '🥬' },
-    herbes: { label: 'Herbes', emoji: '🪴' }
+    tomaquets: { label: 'Tomatoes', emoji: '🍅' },
+    alfabrega: { label: 'Basil', emoji: '🌿' },
+    zucchini: { label: 'Zucchini', emoji: '🥒' },
+    fava beans: { label: 'Fava beans', emoji: '🫘' },
+    chard: { label: 'Chard', emoji: '🥬' },
+    herbs: { label: 'Herbs', emoji: '🪴' }
   };
-  var seasonTotal = 13.2; /* tomàquets 12.4 + alfàbrega 0.8 */
+  var seasonTotal = 13.2; /* tomatoes 12.4 + basil 0.8 */
   var combo = document.getElementById('crop-combo');
   var kgInput = document.getElementById('kg-input');
   var logBtn = document.getElementById('log-btn');

@@ -190,7 +190,7 @@
       <ellipse cx="1142" cy="726" rx="9" ry="6" transform="rotate(10 1142 726)"/>
     </g>
     <text class="map-label map-label--faint" transform="translate(1178 340) rotate(90)"
-          font-size="19" letter-spacing="0.12em">la riera (seca)</text>
+          font-size="19" letter-spacing="0.12em">the dry riverbed</text>
   </g>
 
   <!-- ── Paths between plot groups (dotted, faint) ── -->
@@ -201,7 +201,7 @@
     <path d="M 678 108 C 674 250, 682 520, 677 668"/>
     <path d="M 52 388 C 300 383, 700 392, 1000 386"/>
   </g>
-  <text class="map-label map-label--faint" x="524" y="380" font-size="14">camí del mig</text>
+  <text class="map-label map-label--faint" x="524" y="380" font-size="14">the middle path</text>
 
   <!-- ── Grass tufts ── -->
   <g id="tufts" aria-hidden="true" stroke="var(--fulla-green-soft)" stroke-width="1.8"
@@ -330,23 +330,23 @@
 
   /* ── Demo data (context.md is the source of truth) ── */
   var NAMED = {
-    7:  { name: "Les Faves", owner: "Joana",
-          crops: ["Faves", "Pèsols", "Ceba tendra"],
+    7:  { name: "The Fava Beds", owner: "Joana",
+          crops: ["Fava beans", "Peas", "Ceba tendra"],
           watered: "Last watered 2 days ago",
           note: "Beds prepped for Saturday's fava sowing." },
-    12: { name: "El Secà", owner: "Íngrid",
-          crops: ["Tomàquet de penjar", "Alls"],
+    12: { name: "The Dry Corner", owner: "Íngrid",
+          crops: ["Tomato de penjar", "Garlic"],
           watered: "Last watered 8 days ago",
           flagged: true },
-    23: { name: "Tomàquets de la Marta", owner: "Marta", emoji: "🍅",
-          crops: ["Tomàquet cor de bou", "Tomàquet de penjar", "Alfàbrega"],
+    23: { name: "Marta's Tomatoes", owner: "Marta", emoji: "🍅",
+          crops: ["Tomato cor de bou", "Tomato de penjar", "Basil"],
           watered: "Last watered yesterday (Marta's rota day)",
           note: "96 kg of tomatoes this season and counting." },
-    31: { name: "Racó de les Herbes", owner: "Assumpta", emoji: "🌿",
-          crops: ["Romaní", "Farigola", "Menta", "Sàlvia"],
+    31: { name: "The Herb Corner", owner: "Assumpta", emoji: "🌿",
+          crops: ["Rosemary", "Farigola", "Menta", "Sage"],
           watered: "Last watered 3 days ago" },
-    40: { name: "Bancal Nou", owner: "Omar", emoji: "🌱",
-          crops: ["Bledes", "Carbassó"],
+    40: { name: "The New Bed", owner: "Omar", emoji: "🌱",
+          crops: ["Chard", "Zucchini"],
           watered: "Watered today",
           note: "Freshly dug this spring, first season in use." }
   };
@@ -354,8 +354,8 @@
   var OWNERS = ["Pau", "Greta", "Toni", "Jordi", "Mercè", "Quim", "Laia",
                 "Pere", "Rosa", "Enric", "Montse", "Xavi", "Carme", "Biel",
                 "Neus", "Oriol", "Dolors", "Ramon"];
-  var CROPS = ["Tomàquets", "Carbassó", "Bledes", "Enciams", "Cebes", "Alls",
-               "Pebrots", "Albergínies", "Faves", "Maduixes", "Espinacs",
+  var CROPS = ["Tomatoes", "Zucchini", "Chard", "Enciams", "Cebes", "Garlic",
+               "Pebrots", "Eggplants", "Fava beans", "Maduixes", "Spinach",
                "Porros", "Cols", "Raves"];
   var WATERED = ["Watered today", "Last watered yesterday",
                  "Last watered 2 days ago", "Last watered 3 days ago"];

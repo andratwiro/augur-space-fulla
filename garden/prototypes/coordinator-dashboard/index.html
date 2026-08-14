@@ -135,7 +135,7 @@
     <div class="main-col">
 
       <header class="page-head">
-        <h1 id="greeting">Bon dia, Núria</h1>
+        <h1 id="greeting">Good morning, Núria</h1>
         <p class="f-muted" id="dateline">The garden this week</p>
       </header>
 
@@ -163,7 +163,7 @@
 
         <div class="attn-row">
           <div>
-            <div class="attn-title">Plot 12 · El Secà
+            <div class="attn-title">Plot 12 · The Dry Corner
               <span class="f-chip f-chip--berry">3 missed waterings</span>
             </div>
             <small>The owner is traveling until next week and the chard is starting to sulk.</small>
@@ -188,7 +188,7 @@
             <div class="attn-title">Fava sowing day
               <span class="f-chip f-chip--sun">Saturday</span>
             </div>
-            <small>Communal morning at Les Faves. Seeds are already waiting in the shed.</small>
+            <small>Communal morning at The Fava Beds. Seeds are already waiting in the shed.</small>
           </div>
         </div>
       </section>
@@ -216,34 +216,34 @@
 
         <section class="f-card">
           <h3>Harvest by crop 🍅</h3>
-          <!-- Bars scaled to the biggest crop (tomàquets, 96 kg) -->
+          <!-- Bars scaled to the biggest crop (tomatoes, 96 kg) -->
           <div class="harvest-row">
-            <span class="harvest-crop">Tomàquets</span>
+            <span class="harvest-crop">Tomatoes</span>
             <div class="f-bar" style="width: 100%"></div>
             <span class="harvest-kg">96 kg</span>
           </div>
           <div class="harvest-row">
-            <span class="harvest-crop">Carbassons</span>
+            <span class="harvest-crop">Zucchini</span>
             <div class="f-bar" style="width: 77%"></div>
             <span class="harvest-kg">74 kg</span>
           </div>
           <div class="harvest-row">
-            <span class="harvest-crop">Faves</span>
+            <span class="harvest-crop">Fava beans</span>
             <div class="f-bar" style="width: 60%"></div>
             <span class="harvest-kg">58 kg</span>
           </div>
           <div class="harvest-row">
-            <span class="harvest-crop">Bledes</span>
+            <span class="harvest-crop">Chard</span>
             <div class="f-bar" style="width: 43%"></div>
             <span class="harvest-kg">41 kg</span>
           </div>
           <div class="harvest-row">
-            <span class="harvest-crop">Herbes</span>
+            <span class="harvest-crop">Herbs</span>
             <div class="f-bar" style="width: 20%"></div>
             <span class="harvest-kg">19 kg</span>
           </div>
           <div class="harvest-row">
-            <span class="harvest-crop">Altres</span>
+            <span class="harvest-crop">Others</span>
             <div class="f-bar" style="width: 25%"></div>
             <span class="harvest-kg">24 kg</span>
           </div>
@@ -260,7 +260,7 @@
 <wired-dialog id="cover-dialog">
   <div class="dialog-body">
     <h3>Assign cover</h3>
-    <small>Who can water plot 12 (El Secà) this week?</small>
+    <small>Who can water plot 12 (The Dry Corner) this week?</small>
     <wired-listbox id="cover-list">
       <wired-item value="Pau">Pau · waters Mondays</wired-item>
       <wired-item value="Marta">Marta · waters Tuesdays</wired-item>
@@ -282,7 +282,7 @@
   /* Greeting and date line follow the real clock */
   var now = new Date();
   var hour = now.getHours();
-  var greeting = hour < 12 ? 'Bon dia, Núria' : hour < 20 ? 'Bona tarda, Núria' : 'Bona nit, Núria';
+  var greeting = hour < 12 ? 'Good morning, Núria' : hour < 20 ? 'Good afternoon, Núria' : 'Good evening, Núria';
   document.getElementById('greeting').textContent = greeting;
 
   var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
