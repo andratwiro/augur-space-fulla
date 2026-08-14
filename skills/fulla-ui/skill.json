@@ -1,1 +1,11 @@
-{ "assets": ["fulla-tokens.css", "fulla-ui.css", "vendor"] }
+{
+  "assets": [
+    "fulla-tokens.css",
+    "fulla-ui.css",
+    "vendor"
+  ],
+  "cssPrefixes": [
+    "f",
+    "fulla"
+  ]
+}
