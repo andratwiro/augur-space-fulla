@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The tool shed board: what is out, who has it and when it is due back at Hort de la Riera.">
+<title>Fulla · Tool shed</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  /* ── Prototype-local styles (the board grid on top of the DS) ── */
+
+  .board { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+
+  .tool { display: flex; flex-direction: column; gap: var(--fulla-s2); }
+  .tool__top { display: flex; align-items: flex-start; gap: var(--fulla-s3); }
+  .tool__icon { font-size: 2rem; line-height: 1; flex: none; }
+  .tool__name { font-family: var(--fulla-font-display); font-weight: 700;
+    color: var(--fulla-green-deep); font-size: var(--fulla-text-lg); }
+  .tool__who { min-height: 2.6em; }
+  .tool__foot { display: flex; align-items: center; justify-content: space-between;
+    gap: var(--fulla-s2); margin-top: auto; }
+
+  /* A tool that is home reads quieter than one that is out. */
+  .tool.is-in { background: var(--fulla-paper-2); }
+  .tool.is-in .tool__icon { opacity: 0.65; }
+
+  .shed-note { display: flex; align-items: center; gap: var(--fulla-s4); flex-wrap: wrap; }
+</style>
+</head>
+<body data-gv-screen="board">
+
+<main class="f-page">
+
+  <div class="f-row f-between f-wrap" style="margin-bottom: var(--fulla-s5)">
+    <div>
+      <h1>Tool shed</h1>
+      <p class="f-muted" style="margin:0">The things everyone needs, and one of most of them. Put your name on it when you take it.</p>
+    </div>
+    <div class="f-row">
+      <wired-search-input placeholder="Find a tool"></wired-search-input>
+      <wired-button class="f-primary">Add a tool</wired-button>
+    </div>
+  </div>
+
+  <div class="f-card f-card--soft shed-note" style="margin-bottom: var(--fulla-s5)">
+    <span style="font-size:1.6rem">🔑</span>
+    <div class="f-grow">
+      <strong>The shed key lives in the box by the north tap.</strong>
+      <div class="f-muted">Code is the year the garden started. Ask Núria if it sticks.</div>
+    </div>
+    <span class="f-chip f-chip--green" id="count">4 of 7 in the shed</span>
+  </div>
+
+  <div class="f-grid board" id="board">
+    <!-- filled by the script below, from TOOLS -->
+  </div>
+
+  <p class="f-muted" style="margin-top: var(--fulla-s6)">
+    Anything out longer than a week shows up on the coordinator dashboard.
+  </p>
+
+</main>
+
+<script>
+// The board is data-driven so the "take it / bring it back" flip stays honest:
+// one list, one render, no two places to keep in step.
+var TOOLS = [
+  { icon: "🛞", name: "Wheelbarrow",   who: "Omar",     due: "back Wednesday" },
+  { icon: "🚿", name: "The long hose", who: "Marta",    due: "back tonight" },
+  { icon: "✂️", name: "Loppers",       who: null,       due: null },
+  { icon: "🪏", name: "Spade",         who: "Pau",      due: "back Saturday" },
+  { icon: "🪣", name: "Watering cans", who: null,       due: null },
+  { icon: "🧤", name: "Glove box",     who: null,       due: null },
+  { icon: "🪜", name: "Step ladder",   who: null,       due: null }
+];
+
+var board = document.getElementById("board");
+var count = document.getElementById("count");
+
+function card(t, i) {
+  var out = !!t.who;
+  var el = document.createElement("div");
+  el.className = "f-card tool" + (out ? "" : " is-in");
+  el.innerHTML =
+    '<div class="tool__top">' +
+      '<span class="tool__icon">' + t.icon + '</span>' +
+      '<div class="f-grow">' +
+        '<div class="tool__name">' + t.name + '</div>' +
+        '<span class="f-chip ' + (out ? "f-chip--sun" : "f-chip--green") + '">' +
+          (out ? "out" : "in the shed") + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="tool__who f-muted">' +
+      (out ? "<strong>" + t.who + "</strong> has it, " + t.due
+           : "On its hook, ready to go.") +
+    '</div>' +
+    '<div class="tool__foot"></div>';
+
+  var btn = document.createElement("wired-button");
+  btn.className = out ? "f-secondary" : "f-primary";
+  btn.textContent = out ? "Bring it back" : "Take it";
+  btn.addEventListener("click", function () {
+    // Taking it puts YOUR name on it. Visita is whoever is looking at the board.
+    TOOLS[i].who = out ? null : "Visita";
+    TOOLS[i].due = out ? null : "back tomorrow";
+    render();
+  });
+  el.querySelector(".tool__foot").appendChild(btn);
+  return el;
+}
+
+function render() {
+  board.innerHTML = "";
+  TOOLS.forEach(function (t, i) { board.appendChild(card(t, i)); });
+  var home = TOOLS.filter(function (t) { return !t.who; }).length;
+  count.textContent = home + " of " + TOOLS.length + " in the shed";
+}
+
+render();
+</script>
+
+</body>
+</html>
