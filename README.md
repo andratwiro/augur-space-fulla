@@ -1,14 +1,12 @@
-# Fulla — Augur's example space
+# Fulla, Augur's example space
 
-The demo content behind [demo.augur.works](https://demo.augur.works), and the
+The content behind [demo.augur.works](https://demo.augur.works), and the
 starter space for the [Augur engine](https://github.com/andratwiro/augur).
-Fulla is a fictional product: coordination software for a community garden
-(plots, watering rotas, harvests). Everything here is invented.
+Fulla is an invented product, coordination software for a community garden.
+Plots, watering rotas, harvests. Everything here is fiction, including the
+team.
 
-## Try it locally
-
-Clone this repo and the engine side by side, then run the dev shell from in
-here:
+## Try it
 
 ```bash
 git clone https://github.com/andratwiro/augur.git
@@ -17,33 +15,34 @@ cd augur-space-fulla
 node ../augur/scripts/dev.mjs
 ```
 
-That's the whole setup: login rail, overlays, hot reload. Prototypes also open
-directly from disk (`garden/prototypes/<name>/index.html`) — they are plain
-self-contained HTML.
+That is the whole setup. Prototypes are plain self-contained HTML and also
+open straight from disk (`garden/prototypes/<name>/index.html`).
 
 ## What's in here
 
 ```
-space.json                  the space's contract with the build
-registry.json               the design system's overlay catalog (labels)
-prototype-status.json       dev-status chips baseline
-skills/fulla-ui/            the design system: wired-elements (hand-drawn
-                            web components, vendored) + Fulla paper tokens;
-                            skill.json declares what ships
+space.json                the space's contract with the build
+registry.json             the design system's overlay catalog
+prototype-status.json     dev-status chips baseline
+skills/fulla-ui/          the design system: wired-elements (hand-drawn web
+                          components, vendored) plus Fulla's paper tokens;
+                          skill.json declares what ships
 garden/
-├── context.md              internal brief — NEVER published (that's the point)
+├── context.md            internal brief, never published (that is the point)
 └── prototypes/
-    ├── coordinator-dashboard   desktop overview for the garden coordinator
-    ├── plot-care               mobile member app (SPA, three tabs)
-    ├── garden-map              clickable hand-drawn map of the 48 plots
-    └── seed-pod-3d             spinning botanical specimen (canvas live-tile)
-base/ components/           gallery tier demos
-playground/                 scratch space (ships verbatim)
+    ├── coordinator-dashboard    the coordinator's desktop overview
+    ├── plot-care                mobile member app, three tabs
+    ├── garden-map               clickable hand-drawn map of the 48 plots
+    └── seed-pod-3d              spinning botanical specimen for live tiles
+almanac/prototypes/sowing-wheel  the year as a wheel
+signage/prototypes/plot-sign     printable A5 plot signs
+base/ components/         gallery tier demos
+playground/               scratch space, ships verbatim
 ```
 
 Only `prototypes/` contents, the gallery tiers, `playground/` and the declared
 skill assets publish. `context.md` and everything else beside them stays
-private by construction — keep working notes next to the work.
+private. Keep working notes next to the work.
 
 ## Licenses
 
