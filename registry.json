@@ -1,26 +1,133 @@
 {
   "items": [
-    { "name": "stat", "type": "primitive", "classes": ["f-stat"], "label": "Stat",
-      "description": "A big hand-written number with a quiet label underneath." },
-    { "name": "chip", "type": "primitive", "classes": ["f-chip"], "label": "Chip",
-      "description": "Small inked tag for states and crops; color variants for green, sun, clay, berry and sky." },
-    { "name": "bar", "type": "primitive", "classes": ["f-bar"], "label": "Bar",
-      "description": "A hand-drawn bar for tiny charts: harvests, watering history." },
-    { "name": "sticky", "type": "primitive", "classes": ["f-sticky"], "label": "Sticky note",
-      "description": "A yellow paper note, slightly tilted, same family as the review stickies." },
-    { "name": "wordmark", "type": "primitive", "classes": ["f-logo"], "label": "Wordmark",
-      "description": "The fulla wordmark with its sprout-green leaf." },
-    { "name": "card", "type": "component", "classes": ["f-card"], "label": "Paper card",
-      "description": "The main surface: white paper, wobbly inked border, soft paper shadow." },
-    { "name": "table", "type": "component", "classes": ["f-table"], "label": "Table",
-      "description": "Hand-ruled table with dashed row lines; rotas and lists." },
-    { "name": "navlink", "type": "component", "classes": ["f-navlink"], "label": "Nav link",
-      "description": "Sidebar navigation entry; the active one gets ink and a shadow." },
-    { "name": "tabbar", "type": "component", "classes": ["f-tabbar"], "label": "Tab bar",
-      "description": "Bottom navigation for the phone frame." },
-    { "name": "app-frame", "type": "pattern", "classes": ["f-app"], "label": "App frame",
-      "description": "Desktop shell: paper sidebar plus main column." },
-    { "name": "phone-frame", "type": "pattern", "classes": ["f-phone"], "label": "Phone frame",
-      "description": "Mobile shell: a centered phone with body and tab bar." }
+    {
+      "name": "stat",
+      "type": "primitive",
+      "classes": [
+        "f-stat"
+      ],
+      "label": "Stat",
+      "description": "A big hand-written number with a quiet label underneath."
+    },
+    {
+      "name": "chip",
+      "type": "primitive",
+      "classes": [
+        "f-chip"
+      ],
+      "label": "Chip",
+      "description": "Small inked tag for states and crops; color variants for green, sun, clay, berry and sky."
+    },
+    {
+      "name": "bar",
+      "type": "primitive",
+      "classes": [
+        "f-bar"
+      ],
+      "label": "Bar",
+      "description": "A hand-drawn bar for tiny charts: harvests, watering history."
+    },
+    {
+      "name": "sticky",
+      "type": "primitive",
+      "classes": [
+        "f-sticky"
+      ],
+      "label": "Sticky note",
+      "description": "A yellow paper note, slightly tilted, same family as the review stickies."
+    },
+    {
+      "name": "wordmark",
+      "type": "primitive",
+      "classes": [
+        "f-logo"
+      ],
+      "label": "Wordmark",
+      "description": "The fulla wordmark with its sprout-green leaf."
+    },
+    {
+      "name": "paper-card",
+      "type": "component",
+      "classes": [
+        "f-card"
+      ],
+      "label": "Paper card",
+      "description": "The main surface: white paper, wobbly inked border, soft paper shadow."
+    },
+    {
+      "name": "rota-table",
+      "type": "component",
+      "classes": [
+        "f-table"
+      ],
+      "label": "Table",
+      "description": "Hand-ruled table with dashed row lines; rotas and lists."
+    },
+    {
+      "name": "navlink",
+      "type": "component",
+      "classes": [
+        "f-navlink"
+      ],
+      "label": "Nav link",
+      "description": "Sidebar navigation entry; the active one gets ink and a shadow."
+    },
+    {
+      "name": "tabbar",
+      "type": "component",
+      "classes": [
+        "f-tabbar"
+      ],
+      "label": "Tab bar",
+      "description": "Bottom navigation for the phone frame."
+    },
+    {
+      "name": "app-frame",
+      "type": "pattern",
+      "classes": [
+        "f-app"
+      ],
+      "label": "App frame",
+      "description": "Desktop shell: paper sidebar plus main column."
+    },
+    {
+      "name": "phone-frame",
+      "type": "pattern",
+      "classes": [
+        "f-phone"
+      ],
+      "label": "Phone frame",
+      "description": "Mobile shell: a centered phone with body and tab bar."
+    },
+    {
+      "name": "notice-stack",
+      "type": "pattern",
+      "classes": [
+        "notice"
+      ],
+      "label": "Notice stack",
+      "description": "Titled rows with a state chip, one plain sentence and at most one action."
+    },
+    {
+      "name": "buttons",
+      "type": "primitive",
+      "classes": [],
+      "label": "Buttons and controls",
+      "description": "Every interactive control is a wired element; variants are one color class."
+    },
+    {
+      "name": "palette",
+      "type": "primitive",
+      "classes": [],
+      "label": "Palette",
+      "description": "Paper surfaces, green ink, garden accents. Read from the live tokens."
+    },
+    {
+      "name": "type",
+      "type": "primitive",
+      "classes": [],
+      "label": "Type",
+      "description": "Shantell Sans for the hand, the system stack for body copy."
+    }
   ]
 }
