@@ -1,0 +1,79 @@
+/* Fulla — design tokens
+   The palette of a community garden on paper: warm cream sheets, green ink,
+   a bit of marigold and terracotta. Everything hand-drawn sits on these. */
+
+:root {
+  /* ── Paper (surfaces) ── */
+  --fulla-paper:      #faf6ec;   /* the sheet everything sits on */
+  --fulla-paper-2:    #f3edda;   /* a second sheet underneath */
+  --fulla-paper-3:    #eae2c8;   /* pressed / hover */
+  --fulla-white:      #fffdf6;   /* cards, raised surfaces */
+
+  /* ── Ink ── */
+  --fulla-ink:        #2d3a2e;   /* green-black, every stroke */
+  --fulla-ink-soft:   #5c6b5e;   /* secondary text */
+  --fulla-ink-faint:  #8d998f;   /* hints, placeholders */
+
+  /* ── Garden greens ── */
+  --fulla-green:      #4a7c59;   /* the brand green */
+  --fulla-green-deep: #35593f;   /* headings, emphasis */
+  --fulla-green-soft: #a7c4a0;   /* fills, quiet chips */
+  --fulla-sprout:     #7fb069;   /* fresh, positive, "done" */
+
+  /* ── Accents ── */
+  --fulla-sun:        #e6aa3a;   /* marigold: warnings, highlights */
+  --fulla-clay:       #c17a56;   /* terracotta: pots, secondary actions */
+  --fulla-berry:      #a54657;   /* alerts, overdue */
+  --fulla-sky:        #7da7c4;   /* water, info */
+  --fulla-sticky:     #fce495;   /* sticky notes (same yellow as the review stickies) */
+
+  /* ── Type ── */
+  --fulla-font-display: "Shantell Sans", "Comic Sans MS", cursive;
+  --fulla-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "Helvetica Neue", Arial, sans-serif;
+  --fulla-text-xs:  0.75rem;
+  --fulla-text-sm:  0.875rem;
+  --fulla-text-md:  1rem;
+  --fulla-text-lg:  1.25rem;
+  --fulla-text-xl:  1.6rem;
+  --fulla-text-2xl: 2.1rem;
+  --fulla-text-3xl: 2.8rem;
+
+  /* ── Space ── */
+  --fulla-s1: 0.25rem;
+  --fulla-s2: 0.5rem;
+  --fulla-s3: 0.75rem;
+  --fulla-s4: 1rem;
+  --fulla-s5: 1.5rem;
+  --fulla-s6: 2rem;
+  --fulla-s7: 3rem;
+  --fulla-s8: 4rem;
+
+  /* ── Hand-drawn edges ──
+     Uneven radii make a plain border look sketched. Use on non-wired boxes;
+     wired-* elements draw their own rough strokes. */
+  --fulla-wobble:    255px 15px 225px 15px / 15px 225px 15px 255px;
+  --fulla-wobble-sm: 125px 10px 105px 10px / 10px 105px 10px 125px;
+  --fulla-border:    2px solid var(--fulla-ink);
+
+  /* ── Paper shadows ── */
+  --fulla-shadow:    2px 3px 0 rgba(45, 58, 46, 0.18);
+  --fulla-shadow-lg: 4px 6px 0 rgba(45, 58, 46, 0.16);
+
+  /* ── Wired-elements theme hooks ── */
+  --wired-card-background-fill:   var(--fulla-white);
+  --wired-item-selected-bg:       var(--fulla-green);
+  --wired-item-selected-color:    var(--fulla-paper);
+  --wired-slider-bar-color:       var(--fulla-green-soft);
+  --wired-slider-knob-color:      var(--fulla-green);
+  --wired-slider-knob-outline-color: var(--fulla-green-deep);
+  --wired-toggle-on-color:        var(--fulla-sprout);
+  --wired-toggle-off-color:       var(--fulla-paper-3);
+  --wired-checkbox-icon-color:    var(--fulla-green);
+  --wired-radio-icon-color:       var(--fulla-green);
+  --wired-progress-color:         var(--fulla-green-soft);
+  --wired-progress-label-color:   var(--fulla-ink);
+  --wired-link-decoration-color:  var(--fulla-green);
+  --wired-fab-bg-color:           var(--fulla-green);
+  --wired-combo-popup-bg:         var(--fulla-white);
+}

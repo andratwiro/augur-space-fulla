@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Prototype of Fulla's mobile member app: Marta's plot-care day at Hort de la Riera, with the watering rota, plot notes and a harvest log.">
+<title>Fulla · Plot care (Marta, plot 23)</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  /* ── Prototype-local styles (mobile-snug on top of the DS) ── */
+
+  .f-phone { border-left: 1px dashed var(--fulla-ink-faint); border-right: 1px dashed var(--fulla-ink-faint); }
+  .f-phone .f-card { padding: var(--fulla-s4); }
+
+  .app-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fulla-s3);
+    padding: var(--fulla-s3) var(--fulla-s4);
+    border-bottom: 2px dashed var(--fulla-ink-faint);
+    background: var(--fulla-paper);
+  }
+  .app-top .f-logo { font-size: var(--fulla-text-lg); }
+  .avatar {
+    width: 2.1rem;
+    height: 2.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fulla-green-soft);
+    border: var(--fulla-border);
+    border-radius: var(--fulla-wobble-sm);
+    font-family: var(--fulla-font-display);
+    font-weight: 800;
+  }
+
+  .screen { display: none; }
+  .screen.is-active { display: block; }
+
+  .screen-head { margin-bottom: var(--fulla-s4); }
+  .screen-head h3 { margin-bottom: var(--fulla-s1); }
+
+  /* Watering tasks */
+  .task { padding: var(--fulla-s2) 0; }
+  .task + .task { border-top: 1px dashed var(--fulla-ink-faint); }
+  .task wired-checkbox { display: block; }
+  .task .task-sub {
+    margin: 0 0 0 2rem;
+    color: var(--fulla-ink-soft);
+    font-size: var(--fulla-text-xs);
+  }
+  .task .task-done-note {
+    display: none;
+    margin-left: 2rem;
+    color: var(--fulla-green);
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-xs);
+  }
+  .task.is-done wired-checkbox { color: var(--fulla-ink-faint); text-decoration: line-through; }
+  .task.is-done .task-sub { display: none; }
+  .task.is-done .task-done-note { display: block; }
+
+  #all-done-sticky { margin-top: var(--fulla-s4); }
+
+  /* Notices */
+  .notice { margin-top: var(--fulla-s3); }
+  .notice p { margin: var(--fulla-s2) 0 0; font-size: var(--fulla-text-sm); color: var(--fulla-ink-soft); }
+  .notice .notice-title {
+    font-family: var(--fulla-font-display);
+    font-weight: 700;
+    color: var(--fulla-ink);
+  }
+  .notice .thanks {
+    display: none;
+    margin-top: var(--fulla-s3);
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-sm);
+    color: var(--fulla-green-deep);
+  }
+  .notice.is-helping .help-btn { display: none; }
+  .notice.is-helping .thanks { display: block; }
+
+  /* My plot: watering history */
+  .wchart {
+    display: flex;
+    gap: var(--fulla-s2);
+    align-items: flex-end;
+    margin-top: var(--fulla-s3);
+  }
+  .wcol { flex: 1; text-align: center; }
+  .wcol .f-bar { height: var(--h, 28px); width: 100%; }
+  .wcol .wbar-gap {
+    height: 30px;
+    border: 2px dashed var(--fulla-ink-faint);
+    border-radius: var(--fulla-wobble-sm);
+    background: none;
+  }
+  .wcol .wlab {
+    display: block;
+    margin-top: var(--fulla-s1);
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-xs);
+    color: var(--fulla-ink-soft);
+  }
+  .wcol.is-gap .wlab { color: var(--fulla-clay); }
+
+  .notes-card wired-textarea { display: block; width: 100%; }
+  .notes-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--fulla-s2); min-height: 2.2rem; }
+  .notes-foot .saved-hint { font-family: var(--fulla-font-display); font-size: var(--fulla-text-sm); color: var(--fulla-green); }
+
+  /* Harvest */
+  .hform-row { display: flex; gap: var(--fulla-s3); align-items: center; margin-top: var(--fulla-s3); }
+  .hform-row wired-input { width: 7rem; }
+  #harvest-error { display: none; margin: var(--fulla-s2) 0 0; font-family: var(--fulla-font-display); font-size: var(--fulla-text-sm); }
+  #harvest-error.is-shown { display: block; }
+
+  .hlist { list-style: none; margin: 0; padding: 0; }
+  .hlist li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--fulla-s2);
+    padding: var(--fulla-s2) 0;
+    border-bottom: 1px dashed var(--fulla-ink-faint);
+    font-size: var(--fulla-text-sm);
+  }
+  .hlist li:last-child { border-bottom: none; }
+  .hlist .h-crop { font-family: var(--fulla-font-display); font-weight: 700; }
+  .hlist .h-kg { margin-left: auto; font-family: var(--fulla-font-display); }
+  .hlist .h-when { color: var(--fulla-ink-faint); font-size: var(--fulla-text-xs); }
+  .hlist li.is-new { animation: rowflash 1.6s ease-out; }
+  @keyframes rowflash {
+    0%   { background: var(--fulla-green-soft); }
+    100% { background: transparent; }
+  }
+
+  .gap-below   { margin-bottom: var(--fulla-s4); }
+</style>
+</head>
+<body data-gv-screen="today">
+<div class="f-phone">
+
+  <header class="app-top">
+    <span class="f-logo">fulla<span class="f-leaf">🌿</span></span>
+    <small>Hort de la Riera</small>
+    <span class="avatar" title="Marta · plot 23">M</span>
+  </header>
+
+  <main class="f-phone-body">
+
+    <!-- ── TODAY ─────────────────────────────────────────────── -->
+    <section class="screen is-active" id="screen-today">
+      <div class="screen-head">
+        <h3>Hola, Marta</h3>
+        <div class="f-row f-wrap" style="gap: var(--fulla-s2);">
+          <small>Tuesday 6 October</small>
+          <span class="f-chip f-chip--sky">💧 your rota day</span>
+        </div>
+      </div>
+
+      <div class="f-card gap-below">
+        <div class="f-row f-between">
+          <h4 style="margin: 0;">Watering</h4>
+          <small id="water-count">0 of 3 done</small>
+        </div>
+
+        <div class="task" data-task>
+          <wired-checkbox>Communal beds · north tap</wired-checkbox>
+          <p class="task-sub">The seed trays by the gate drink fast.</p>
+          <span class="task-done-note">done 💧</span>
+        </div>
+        <div class="task" data-task>
+          <wired-checkbox>Communal beds · riera tap</wired-checkbox>
+          <p class="task-sub">Give Racó de les Herbes a light pass too.</p>
+          <span class="task-done-note">done 💧</span>
+        </div>
+        <div class="task" data-task>
+          <wired-checkbox>Your plot · Tomàquets de la Marta</wired-checkbox>
+          <p class="task-sub">Deep soak, the week has been dry.</p>
+          <span class="task-done-note">done 💧</span>
+        </div>
+
+        <div class="f-sticky" id="all-done-sticky" hidden>
+          All watered. The garden says thanks 🌿
+        </div>
+      </div>
+
+      <h4>Around the garden</h4>
+
+      <div class="f-card notice">
+        <div class="f-row f-between">
+          <span class="notice-title">♻️ Compost bay 2 is ready</span>
+          <span class="f-chip f-chip--green">ready</span>
+        </div>
+        <p>Take a bucket for your beds next time you pass.</p>
+      </div>
+
+      <div class="f-card notice">
+        <div class="f-row f-between">
+          <span class="notice-title">🫘 Fava sowing at Bancal Nou</span>
+          <span class="f-chip f-chip--sun">Saturday</span>
+        </div>
+        <p>Communal morning from 9. Bring gloves if you have them.</p>
+      </div>
+
+      <div class="f-card notice" id="help-notice">
+        <div class="f-row f-between">
+          <span class="notice-title">🍂 Plot 12 · El Secà needs a cover</span>
+          <span class="f-chip f-chip--clay" id="help-chip">needs a hand</span>
+        </div>
+        <p>The owner is traveling and it has missed three waterings. A shade cover this week would save the chard.</p>
+        <wired-button class="help-btn f-primary" id="help-btn">I can help</wired-button>
+        <div class="thanks">You're on it 💚 Núria will send you the details.</div>
+      </div>
+    </section>
+
+    <!-- ── MY PLOT ───────────────────────────────────────────── -->
+    <section class="screen" id="screen-my-plot">
+      <div class="screen-head">
+        <h3>Plot 23</h3>
+        <div class="f-row f-wrap" style="gap: var(--fulla-s2);">
+          <small>Tomàquets de la Marta</small>
+          <span class="f-chip f-chip--green">🍅 tomàquets</span>
+          <span class="f-chip">🌿 alfàbrega</span>
+          <span class="f-chip f-chip--sky">riera tap</span>
+        </div>
+      </div>
+
+      <div class="f-card gap-below">
+        <h4 style="margin-bottom: 0;">Watering · last 7 days</h4>
+        <div class="wchart">
+          <div class="wcol"><div class="f-bar" style="--h: 34px;"></div><span class="wlab">Mo</span></div>
+          <div class="wcol"><div class="f-bar" style="--h: 26px;"></div><span class="wlab">Tu</span></div>
+          <div class="wcol"><div class="f-bar" style="--h: 40px;"></div><span class="wlab">We</span></div>
+          <div class="wcol is-gap"><div class="wbar-gap" title="missed"></div><span class="wlab">Th</span></div>
+          <div class="wcol"><div class="f-bar" style="--h: 30px;"></div><span class="wlab">Fr</span></div>
+          <div class="wcol"><div class="f-bar f-bar--sun" style="--h: 22px;"></div><span class="wlab">Sa</span></div>
+          <div class="wcol"><div class="f-bar" style="--h: 36px;"></div><span class="wlab">Su</span></div>
+        </div>
+        <p style="margin: var(--fulla-s3) 0 0;"><small>6 of 7 days. Thursday slipped by, it happens.</small></p>
+      </div>
+
+      <div class="f-card notes-card">
+        <h4>Plot notes</h4>
+        <wired-textarea id="plot-notes" rows="5" placeholder="How is the plot doing?"></wired-textarea>
+        <div class="notes-foot">
+          <small class="f-faint">Only you and Núria see these.</small>
+          <span class="saved-hint" id="notes-saved">Saved ✓</span>
+          <wired-button class="f-primary" id="notes-save" hidden>Save note</wired-button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HARVEST ───────────────────────────────────────────── -->
+    <section class="screen" id="screen-harvest">
+      <div class="screen-head">
+        <h3>Harvest</h3>
+        <div class="f-stat">
+          <div class="f-stat-num" id="season-total">13.2 kg</div>
+          <div class="f-stat-label">logged this season · plot 23</div>
+        </div>
+      </div>
+
+      <div class="f-card gap-below">
+        <h4>Log a harvest</h4>
+        <wired-combo id="crop-combo" selected="tomaquets">
+          <wired-item value="tomaquets">Tomàquets</wired-item>
+          <wired-item value="alfabrega">Alfàbrega</wired-item>
+          <wired-item value="carbassons">Carbassons</wired-item>
+          <wired-item value="faves">Faves</wired-item>
+          <wired-item value="bledes">Bledes</wired-item>
+          <wired-item value="herbes">Herbes</wired-item>
+        </wired-combo>
+        <div class="hform-row">
+          <wired-input id="kg-input" type="number" min="0" step="0.1" placeholder="kg"></wired-input>
+          <wired-button class="f-primary" id="log-btn">Log it</wired-button>
+        </div>
+        <p class="f-danger" id="harvest-error">Pick a crop and a weight first 🌱</p>
+      </div>
+
+      <div class="f-card">
+        <h4>This season</h4>
+        <ul class="hlist" id="season-list">
+          <li><span>🍅</span><span class="h-crop">Tomàquets</span><span class="h-kg">12.4 kg</span><span class="h-when">so far</span></li>
+          <li><span>🌿</span><span class="h-crop">Alfàbrega</span><span class="h-kg">0.8 kg</span><span class="h-when">so far</span></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="f-tabbar">
+    <button data-screen="today" class="is-active"><span class="f-tabicon">💧</span>Today</button>
+    <button data-screen="my-plot"><span class="f-tabicon">🌱</span>My plot</button>
+    <button data-screen="harvest"><span class="f-tabicon">🧺</span>Harvest</button>
+  </nav>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Tabs (screen swap without changing the URL) ──
+     The Augur comment overlay scopes pins by <body data-gv-screen>,
+     so it MUST be updated on every switch. */
+  var tabs = document.querySelectorAll('.f-tabbar button');
+  var screens = document.querySelectorAll('.screen');
+
+  function showScreen(name) {
+    document.body.setAttribute('data-gv-screen', name);
+    var i, el;
+    for (i = 0; i < screens.length; i++) {
+      screens[i].classList.toggle('is-active', screens[i].id === 'screen-' + name);
+    }
+    for (i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('is-active', tabs[i].getAttribute('data-screen') === name);
+    }
+    /* Nudge wired elements that first rendered while hidden. */
+    var active = document.getElementById('screen-' + name);
+    var kids = active.querySelectorAll('*');
+    for (i = 0; i < kids.length; i++) {
+      el = kids[i];
+      if (typeof el.requestUpdate === 'function') { el.requestUpdate(); }
+    }
+  }
+
+  for (var t = 0; t < tabs.length; t++) {
+    (function (btn) {
+      btn.addEventListener('click', function () {
+        showScreen(btn.getAttribute('data-screen'));
+      });
+    })(tabs[t]);
+  }
+
+  /* ── Today: watering tasks ── */
+  var taskEls = document.querySelectorAll('[data-task]');
+  var waterCount = document.getElementById('water-count');
+  var allDoneSticky = document.getElementById('all-done-sticky');
+
+  function refreshWatering() {
+    var done = 0;
+    for (var i = 0; i < taskEls.length; i++) {
+      if (taskEls[i].classList.contains('is-done')) { done++; }
+    }
+    waterCount.textContent = done + ' of ' + taskEls.length + ' done';
+    allDoneSticky.hidden = done !== taskEls.length;
+  }
+
+  for (var k = 0; k < taskEls.length; k++) {
+    (function (task) {
+      var box = task.querySelector('wired-checkbox');
+      box.addEventListener('change', function (e) {
+        task.classList.toggle('is-done', !!(e.detail && e.detail.checked));
+        refreshWatering();
+      });
+    })(taskEls[k]);
+  }
+  refreshWatering();
+
+  /* ── Today: "I can help" flip ── */
+  var helpNotice = document.getElementById('help-notice');
+  var helpChip = document.getElementById('help-chip');
+  document.getElementById('help-btn').addEventListener('click', function () {
+    helpNotice.classList.add('is-helping');
+    helpChip.textContent = "you're on it";
+    helpChip.className = 'f-chip f-chip--green';
+  });
+
+  /* ── My plot: notes ── */
+  var SAVED_NOTE = 'Staked the second row of tomàquets. Pinch the alfàbrega ' +
+    'before it flowers. Ask Núria for a scoop of bay 2 compost.';
+  var notesEl = document.getElementById('plot-notes');
+  var notesSaved = document.getElementById('notes-saved');
+  var notesSaveBtn = document.getElementById('notes-save');
+
+  customElements.whenDefined('wired-textarea').then(function () {
+    notesEl.value = SAVED_NOTE;
+  });
+  notesEl.addEventListener('input', function () {
+    notesSaved.hidden = true;
+    notesSaveBtn.hidden = false;
+  });
+  notesSaveBtn.addEventListener('click', function () {
+    SAVED_NOTE = notesEl.value || '';
+    notesSaveBtn.hidden = true;
+    notesSaved.textContent = 'Saved just now ✓';
+    notesSaved.hidden = false;
+  });
+
+  /* ── Harvest: log form + in-memory season list ── */
+  var CROPS = {
+    tomaquets: { label: 'Tomàquets', emoji: '🍅' },
+    alfabrega: { label: 'Alfàbrega', emoji: '🌿' },
+    carbassons: { label: 'Carbassons', emoji: '🥒' },
+    faves: { label: 'Faves', emoji: '🫘' },
+    bledes: { label: 'Bledes', emoji: '🥬' },
+    herbes: { label: 'Herbes', emoji: '🪴' }
+  };
+  var seasonTotal = 13.2; /* tomàquets 12.4 + alfàbrega 0.8 */
+  var combo = document.getElementById('crop-combo');
+  var kgInput = document.getElementById('kg-input');
+  var logBtn = document.getElementById('log-btn');
+  var errEl = document.getElementById('harvest-error');
+  var listEl = document.getElementById('season-list');
+  var totalEl = document.getElementById('season-total');
+
+  function logHarvest() {
+    var cropKey = combo.selected;
+    var kg = parseFloat(String(kgInput.value || '').replace(',', '.'));
+    if (!cropKey || !CROPS[cropKey] || !(kg > 0)) {
+      errEl.classList.add('is-shown');
+      return;
+    }
+    errEl.classList.remove('is-shown');
+
+    var crop = CROPS[cropKey];
+    var li = document.createElement('li');
+    li.className = 'is-new';
+
+    var em = document.createElement('span');
+    em.textContent = crop.emoji;
+    var name = document.createElement('span');
+    name.className = 'h-crop';
+    name.textContent = crop.label;
+    var weight = document.createElement('span');
+    weight.className = 'h-kg';
+    weight.textContent = kg.toFixed(1).replace(/\.0$/, '') + ' kg';
+    var when = document.createElement('span');
+    when.className = 'h-when';
+    when.textContent = 'just now';
+
+    li.appendChild(em);
+    li.appendChild(name);
+    li.appendChild(weight);
+    li.appendChild(when);
+    listEl.insertBefore(li, listEl.firstChild);
+
+    seasonTotal += kg;
+    totalEl.textContent = (Math.round(seasonTotal * 10) / 10) + ' kg';
+    kgInput.value = '';
+  }
+
+  logBtn.addEventListener('click', logHarvest);
+  kgInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { logHarvest(); }
+  });
+})();
+</script>
+</body>
+</html>

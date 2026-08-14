@@ -1,0 +1,7 @@
+{
+  "_comment": "Dev-status baseline per prototype, keyed <project>/<prototype>. Values: in-progress | dev-ready | ignore. Live chips cycle on click (KV) over this baseline.",
+  "garden/coordinator-dashboard": "dev-ready",
+  "garden/plot-care": "dev-ready",
+  "garden/garden-map": "in-progress",
+  "garden/seed-pod-3d": "dev-ready"
+}

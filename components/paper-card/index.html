@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fulla's surfaces working together: paper card, stat, chips, bars, sticky and wired controls.">
+<title>Paper card — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<script src="../../skills/fulla-ui/vendor/wired-elements.js"></script>
+</head>
+<body>
+<main class="f-page">
+  <h1>Paper card</h1>
+  <p class="f-muted">The main surface, composed with the small parts that live on it.</p>
+  <div class="f-grid" style="grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr))">
+    <div class="f-card">
+      <h3>Harvest</h3>
+      <div class="f-stat"><div class="f-stat-num">312 kg</div><div class="f-stat-label">this season, 48 plots</div></div>
+      <hr class="f-divider">
+      <div class="f-col" style="gap: var(--fulla-s2)">
+        <div class="f-row"><span style="width:6.5rem">Tomàquets</span><div class="f-bar f-grow" style="max-width:60%"></div><small>96</small></div>
+        <div class="f-row"><span style="width:6.5rem">Carbassons</span><div class="f-bar f-grow" style="max-width:46%"></div><small>74</small></div>
+        <div class="f-row"><span style="width:6.5rem">Faves</span><div class="f-bar f-bar--sun f-grow" style="max-width:36%"></div><small>58</small></div>
+      </div>
+    </div>
+    <div class="f-card f-card--soft">
+      <h3>States</h3>
+      <p><span class="f-chip f-chip--green">compost ready</span> <span class="f-chip f-chip--sun">sowing Saturday</span> <span class="f-chip f-chip--berry">3 missed waterings</span> <span class="f-chip f-chip--sky">watered today</span> <span class="f-chip">plot 23</span></p>
+      <hr class="f-divider">
+      <div class="f-row f-wrap">
+        <wired-button class="f-primary" elevation="2">Assign cover</wired-button>
+        <wired-button>Skip</wired-button>
+        <wired-toggle checked></wired-toggle>
+      </div>
+    </div>
+    <div class="f-sticky">Ask Joana if the north tap still drips — bring the washer Saturday.</div>
+  </div>
+</main>
+</body>
+</html>

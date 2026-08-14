@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Spinning hand-drawn seed and pod specimens from the Hort de la Riera swap shelf.">
+<title>Seed library · Fulla</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  .seed-page { max-width: 46rem; }
+  .seed-page header { margin-bottom: var(--fulla-s4); }
+  .seed-page header p { margin: 0; }
+
+  .seed-stage {
+    position: relative;
+    padding: var(--fulla-s4);
+    margin-bottom: var(--fulla-s4);
+  }
+  .seed-stage canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    max-height: 68vh;
+  }
+
+  /* Hand-written annotation over the illustration */
+  .seed-note {
+    position: absolute;
+    top: var(--fulla-s5);
+    left: var(--fulla-s5);
+    max-width: 15rem;
+    font-family: var(--fulla-font-display);
+    transform: rotate(-2deg);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+  }
+  .seed-note.is-hidden {
+    opacity: 0;
+    transform: rotate(-2deg) translateY(-6px);
+  }
+  .seed-note-name {
+    font-weight: 700;
+    font-size: var(--fulla-text-lg);
+    color: var(--fulla-green-deep);
+    line-height: 1.2;
+  }
+  .seed-note-name em {
+    font-weight: 400;
+    font-size: var(--fulla-text-sm);
+    color: var(--fulla-ink-soft);
+  }
+  .seed-note-fact {
+    margin-top: var(--fulla-s1);
+    font-size: var(--fulla-text-sm);
+    color: var(--fulla-ink-soft);
+    line-height: 1.35;
+  }
+  .seed-note-arrow {
+    display: block;
+    margin-top: var(--fulla-s1);
+    margin-left: var(--fulla-s4);
+    color: var(--fulla-ink-soft);
+  }
+  .seed-note.note-pop { animation: seed-note-pop 0.35s ease-out; }
+  @keyframes seed-note-pop {
+    from { opacity: 0; transform: rotate(-2deg) translateY(-6px); }
+    to   { opacity: 1; transform: rotate(-2deg) translateY(0); }
+  }
+
+  .seed-controls .f-row { align-items: flex-end; }
+  .seed-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fulla-s1);
+  }
+  .seed-field > span { font-size: var(--fulla-text-xs); }
+  .seed-field--spin { flex: 1; min-width: 11rem; }
+  #spin { display: block; width: 100%; }
+  .seed-hint { display: block; margin-top: var(--fulla-s3); }
+</style>
+</head>
+<body>
+<div class="f-page seed-page">
+  <header>
+    <h1>Seed library 🌱</h1>
+    <p class="f-muted">Specimens from the swap shelf at Hort de la Riera. Give one a spin.</p>
+  </header>
+
+  <div class="f-card seed-stage">
+    <canvas id="stage" aria-label="Rotating seed specimen"></canvas>
+    <div id="note" class="seed-note note-pop">
+      <div class="seed-note-name" id="note-name"></div>
+      <div class="seed-note-fact" id="note-fact"></div>
+      <svg class="seed-note-arrow" viewBox="0 0 60 40" width="52" height="34" aria-hidden="true">
+        <path d="M5 5 C 20 8, 34 14, 45 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M36 28 L 46 31 L 43 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="f-card seed-controls">
+    <div class="f-row f-wrap">
+      <label class="seed-field">
+        <span class="f-muted">Specimen</span>
+        <wired-combo id="specimen" selected="fava">
+          <wired-item value="fava">🫛 Fava pod</wired-item>
+          <wired-item value="tomaquet">🍅 Tomàquet seed</wired-item>
+          <wired-item value="carbasso">🥒 Carbassó seed</wired-item>
+        </wired-combo>
+      </label>
+      <label class="seed-field seed-field--spin">
+        <span class="f-muted">Spin</span>
+        <wired-slider id="spin" min="0" max="100" value="32"></wired-slider>
+      </label>
+      <label class="seed-field">
+        <span class="f-muted">Labels</span>
+        <wired-toggle id="labels" checked></wired-toggle>
+      </label>
+    </div>
+    <small class="f-faint seed-hint">Slide spin to 0 to hold a pose.</small>
+  </div>
+</div>
+
+<script>
+/*MATH-CORE-START*/
+/* DOM-free fake-3D core: each specimen is a stack of elliptical cross-sections
+   along a vertical spine. Spin around Y, tilt around X, simple perspective,
+   painter's-algorithm depth sort. The build check runs this in node. */
+var SEED_MATH = (function () {
+  var TAU = Math.PI * 2;
+
+  function makeSpecimens() {
+    return {
+      fava: {
+        name: 'Fava', latin: 'Vicia faba',
+        fact: 'Sow in autumn. Saturday is sowing day at Hort de la Riera.',
+        H: 2.3, N: 40,
+        tones: ['#35593f', '#4a7c59', '#7fb069'],
+        profile: function (t) {
+          var stemT = 0.92;
+          if (t <= stemT) {
+            var u = t / stemT;
+            var env = Math.pow(Math.sin(Math.PI * (0.03 + 0.94 * u)), 0.5);
+            var lump = 0.88 + 0.18 * Math.pow(Math.abs(Math.sin(u * Math.PI * 4.5 + 0.3)), 1.4);
+            var rx = 0.34 * env * lump;
+            return { rx: rx, rz: 0.62 * rx, ox: -0.26 * Math.sin(Math.PI * u), oz: 0 };
+          }
+          var v = (t - stemT) / (1 - stemT);
+          var rs = 0.07 * (1 - 0.45 * v) + 0.015;
+          return { rx: rs, rz: rs, ox: 0.12 * Math.sin(v * 1.6), oz: 0 };
+        },
+        tone: function (t) {
+          if (t > 0.92) return 0;
+          if (t < 0.20) return 0;
+          if (t > 0.66) return 2;
+          return 1;
+        }
+      },
+      tomaquet: {
+        name: 'Tomàquet', latin: 'Solanum lycopersicum',
+        fact: 'Saved from plot 23, Tomàquets de la Marta. 96 kg picked so far this season.',
+        H: 1.35, N: 30,
+        tones: ['#a54657', '#c17a56', '#e6aa3a'],
+        profile: function (t) {
+          var env = Math.sin(Math.PI * Math.pow(Math.max(t, 0.002), 0.75));
+          var rx = 0.62 * Math.pow(env, 0.8);
+          return { rx: rx, rz: 0.36 * rx + 0.008, ox: 0.05 * t, oz: 0 };
+        },
+        tone: function (t) {
+          if (t < 0.18) return 0;
+          if (t > 0.72) return 2;
+          return 1;
+        }
+      },
+      carbasso: {
+        name: 'Carbassó', latin: 'Cucurbita pepo',
+        fact: 'Dry on the windowsill for a week before it goes on the swap shelf.',
+        H: 1.8, N: 34,
+        tones: ['#eae2c8', '#f3edda', '#fffdf6'],
+        profile: function (t) {
+          var env = Math.sin(Math.PI * Math.pow(Math.max(t, 0.002), 0.88));
+          var rx = 0.50 * Math.pow(env, 0.62);
+          return { rx: rx, rz: 0.26 * rx + 0.01, ox: 0, oz: 0 };
+        },
+        tone: function (t) {
+          if (t < 0.16) return 0;
+          if (t > 0.70) return 2;
+          return 1;
+        }
+      }
+    };
+  }
+
+  function buildModel(spec) {
+    var M = 28;
+    var slices = [];
+    var hb = 0, vb = 0;
+    for (var i = 0; i < spec.N; i++) {
+      var t = i / (spec.N - 1);
+      var p = spec.profile(t);
+      var cy = (t - 0.5) * spec.H;
+      var pts = [];
+      for (var j = 0; j < M; j++) {
+        var phi = (j / M) * TAU;
+        /* stable hand-wobble in the local frame, so it spins with the object */
+        var w = 1 + 0.028 * (0.6 * Math.sin(3 * phi + i * 1.7) + 0.4 * Math.sin(7 * phi + i * 0.9));
+        pts.push(Math.cos(phi) * w, Math.sin(phi) * w);
+      }
+      hb = Math.max(hb, Math.hypot(Math.abs(p.ox) + p.rx, Math.abs(p.oz) + p.rz));
+      vb = Math.max(vb, Math.abs(cy));
+      slices.push({ cy: cy, ox: p.ox, oz: p.oz, rx: p.rx, rz: p.rz, tone: spec.tone(t), pts: pts });
+    }
+    return { slices: slices, hb: hb, vb: vb, tones: spec.tones };
+  }
+
+  /* Returns depth-sorted screen polygons plus the shadow ellipse. */
+  function projectFrame(model, theta, tilt, bobY, w, h, pop) {
+    var F = 6;
+    var ct = Math.cos(tilt), st = Math.sin(tilt);
+    var cs = Math.cos(theta), sn = Math.sin(theta);
+    var vExt = (model.vb + 0.34) * ct + model.hb * st;
+    var S = pop * 0.92 * Math.min(w / (2 * model.hb * 1.32), h / (2 * vExt * 1.16));
+    var cx = w / 2, cyp = h * 0.46;
+    var out = [];
+    for (var i = 0; i < model.slices.length; i++) {
+      var s = model.slices[i];
+      var cyb = s.cy + bobY;
+      var czr = s.oz * cs - s.ox * sn;
+      var depth = cyb * st + czr * ct;
+      var poly = [];
+      for (var j = 0; j < s.pts.length; j += 2) {
+        var x = s.ox + s.rx * s.pts[j];
+        var z = s.oz + s.rz * s.pts[j + 1];
+        var xr = x * cs + z * sn;
+        var zr = z * cs - x * sn;
+        var y2 = cyb * ct - zr * st;
+        var z2 = cyb * st + zr * ct;
+        var pf = F / (F - z2);
+        poly.push(cx + xr * pf * S, cyp - y2 * pf * S);
+      }
+      out.push({ depth: depth, tone: s.tone, poly: poly });
+    }
+    out.sort(function (a, b) { return a.depth - b.depth; });
+    var yg = -(model.vb + 0.30);
+    var gpf = F / (F - yg * st);
+    var shadow = {
+      x: cx, y: cyp - yg * ct * gpf * S,
+      rx: model.hb * S * 0.85, ry: model.hb * S * 0.85 * st * 0.8
+    };
+    return { polys: out, shadow: shadow, scale: S };
+  }
+
+  return { makeSpecimens: makeSpecimens, buildModel: buildModel, projectFrame: projectFrame };
+})();
+/*MATH-CORE-END*/
+
+(function () {
+  var INK = '#2d3a2e';
+  var canvas = document.getElementById('stage');
+  var ctx = canvas.getContext('2d');
+  var note = document.getElementById('note');
+  var noteName = document.getElementById('note-name');
+  var noteFact = document.getElementById('note-fact');
+
+  var specs = SEED_MATH.makeSpecimens();
+  var models = {};
+  function modelFor(key) {
+    if (!models[key]) models[key] = SEED_MATH.buildModel(specs[key]);
+    return models[key];
+  }
+
+  var current = 'fava';
+  var theta = 0.6;
+  var speed = radPerSec(32);
+  var time = 0;
+  var popK = 0;           /* grow-in on load and on specimen change */
+  var DPR = 1, cssW = 300, cssH = 240;
+  var raf = null, last = 0;
+
+  function radPerSec(v) { return Math.pow(v / 100, 1.25) * 3.0; }
+
+  function easeOutBack(k) {
+    var c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2);
+  }
+
+  function resize() {
+    var r = canvas.getBoundingClientRect();
+    if (r.width < 10) return;
+    DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    cssW = Math.round(r.width);
+    cssH = Math.round(r.height);
+    var pw = Math.round(cssW * DPR), ph = Math.round(cssH * DPR);
+    if (canvas.width !== pw || canvas.height !== ph) {
+      canvas.width = pw;
+      canvas.height = ph;
+    }
+  }
+
+  function draw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    var bobN = Math.sin(time * 1.35);
+    var bobY = 0.05 * bobN;
+    var tilt = 0.48 + 0.035 * Math.sin(time * 0.8);
+    var pop = 0.78 + 0.22 * easeOutBack(Math.min(popK, 1));
+    var model = modelFor(current);
+    var frame = SEED_MATH.projectFrame(model, theta, tilt, bobY, cssW, cssH, pop);
+
+    /* ground shadow */
+    ctx.beginPath();
+    var sh = frame.shadow;
+    var shScale = 1 - 0.16 * bobN;
+    ctx.ellipse(sh.x, sh.y, Math.max(1, sh.rx * shScale), Math.max(1, sh.ry * shScale), 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(45, 58, 46, ' + (0.11 - 0.02 * bobN).toFixed(3) + ')';
+    ctx.fill();
+
+    /* slices, far to near */
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = Math.max(1, Math.min(2.4, frame.scale * 0.012));
+    ctx.strokeStyle = INK;
+    for (var i = 0; i < frame.polys.length; i++) {
+      var p = frame.polys[i].poly;
+      ctx.beginPath();
+      ctx.moveTo(p[0], p[1]);
+      for (var j = 2; j < p.length; j += 2) ctx.lineTo(p[j], p[j + 1]);
+      ctx.closePath();
+      ctx.fillStyle = model.tones[frame.polys[i].tone];
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
+  function frame(ts) {
+    var dt = Math.min(Math.max((ts - last) / 1000, 0), 0.1);
+    last = ts;
+    time += dt;
+    theta = (theta + speed * dt) % (Math.PI * 2);
+    if (popK < 1) popK = Math.min(1, popK + dt / 0.4);
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (raf === null) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+  }
+  function stop() {
+    if (raf !== null) {
+      cancelAnimationFrame(raf);
+      raf = null;
+    }
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop(); else start();
+  });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(resize).observe(canvas);
+  }
+  window.addEventListener('resize', resize);
+
+  function setNote(key) {
+    var s = specs[key];
+    noteName.innerHTML = s.name + ' · <em>' + s.latin + '</em>';
+    noteFact.textContent = s.fact;
+    note.classList.remove('note-pop');
+    void note.offsetWidth;
+    note.classList.add('note-pop');
+  }
+
+  document.getElementById('specimen').addEventListener('selected', function (e) {
+    var key = e.detail && e.detail.selected;
+    if (!key || !specs[key] || key === current) return;
+    current = key;
+    popK = 0;
+    setNote(key);
+  });
+  document.getElementById('spin').addEventListener('change', function (e) {
+    if (e.detail && typeof e.detail.value !== 'undefined') speed = radPerSec(+e.detail.value);
+  });
+  document.getElementById('labels').addEventListener('change', function (e) {
+    note.classList.toggle('is-hidden', !(e.detail && e.detail.checked));
+  });
+
+  setNote(current);
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

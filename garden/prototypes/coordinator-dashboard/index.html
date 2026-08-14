@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fulla coordinator dashboard prototype, the Overview screen Núria sees for Hort de la Riera.">
+<title>Fulla · Overview — Hort de la Riera</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  /* ── Page-specific layout on top of the Fulla DS ── */
+
+  .f-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fulla-s1);
+    margin-top: var(--fulla-s4);
+  }
+  .sidebar-foot {
+    margin-top: auto;
+    padding: var(--fulla-s3) var(--fulla-s3) 0;
+    border-top: 2px dashed var(--fulla-ink-faint);
+    color: var(--fulla-ink-soft);
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-sm);
+  }
+
+  .page-head h1 { margin-bottom: var(--fulla-s1); }
+  .main-col { display: flex; flex-direction: column; gap: var(--fulla-s5); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: var(--fulla-s4);
+  }
+  .stats-grid .f-card { padding: var(--fulla-s4) var(--fulla-s5); }
+
+  /* Needs attention list */
+  .attn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--fulla-s4);
+    flex-wrap: wrap;
+    padding: var(--fulla-s4) 0;
+    border-bottom: 1px dashed var(--fulla-ink-faint);
+  }
+  .attn-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .attn-row:first-of-type { padding-top: var(--fulla-s2); }
+  .attn-title {
+    font-family: var(--fulla-font-display);
+    font-weight: 600;
+    margin-bottom: var(--fulla-s1);
+  }
+  .attn-title .f-chip { margin-left: var(--fulla-s2); vertical-align: 0.1rem; }
+  .cover-done {
+    font-family: var(--fulla-font-display);
+    font-weight: 700;
+    color: var(--fulla-green-deep);
+  }
+
+  /* Rota + harvest sit side by side, collapse on narrow screens */
+  .panels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+    gap: var(--fulla-s5);
+    align-items: start;
+  }
+  .f-table tr.is-today td {
+    background: var(--fulla-paper-3);
+    font-weight: 600;
+  }
+  .f-table .f-chip { margin-left: var(--fulla-s2); }
+  .panel-foot { display: block; margin-top: var(--fulla-s4); }
+
+  /* Harvest bars */
+  .harvest-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr 3.5rem;
+    align-items: center;
+    gap: var(--fulla-s3);
+    margin-bottom: var(--fulla-s3);
+  }
+  .harvest-crop { font-family: var(--fulla-font-display); font-size: var(--fulla-text-sm); }
+  .harvest-kg {
+    text-align: right;
+    color: var(--fulla-ink-soft);
+    font-size: var(--fulla-text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Assign-cover dialog */
+  .dialog-body {
+    padding: var(--fulla-s5);
+    min-width: 19rem;
+    max-width: 23rem;
+  }
+  .dialog-body wired-listbox { display: block; width: 100%; margin: var(--fulla-s4) 0 var(--fulla-s5); }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: var(--fulla-s3); }
+
+  /* Narrow screens: sidebar becomes a top bar so nothing breaks */
+  @media (max-width: 760px) {
+    .f-app { grid-template-columns: 1fr; }
+    .f-sidebar {
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
+      border-right: none;
+      border-bottom: var(--fulla-border);
+    }
+    .f-sidebar nav { flex-direction: row; flex-wrap: wrap; margin-top: 0; }
+    .sidebar-foot { margin: 0 0 0 auto; border-top: none; padding: 0; }
+    .f-main { padding: var(--fulla-s4); }
+  }
+</style>
+</head>
+<body data-gv-screen="overview">
+
+<div class="f-app">
+
+  <aside class="f-sidebar">
+    <div class="f-logo">fulla<span class="f-leaf">🌿</span></div>
+    <nav>
+      <a class="f-navlink is-active" aria-current="page" href="#">Overview</a>
+      <a class="f-navlink" href="#">Plots</a>
+      <a class="f-navlink" href="#">Rota</a>
+      <a class="f-navlink" href="#">Harvest</a>
+      <a class="f-navlink" href="#">Members</a>
+    </nav>
+    <div class="sidebar-foot">Hort de la Riera</div>
+  </aside>
+
+  <main class="f-main">
+    <div class="main-col">
+
+      <header class="page-head">
+        <h1 id="greeting">Bon dia, Núria</h1>
+        <p class="f-muted" id="dateline">The garden this week</p>
+      </header>
+
+      <div class="stats-grid">
+        <div class="f-card f-stat">
+          <div class="f-stat-num">48</div>
+          <div class="f-stat-label">plots</div>
+        </div>
+        <div class="f-card f-stat">
+          <div class="f-stat-num">61</div>
+          <div class="f-stat-label">members</div>
+        </div>
+        <div class="f-card f-stat">
+          <div class="f-stat-num">9</div>
+          <div class="f-stat-label">on the waitlist</div>
+        </div>
+        <div class="f-card f-stat">
+          <div class="f-stat-num">312</div>
+          <div class="f-stat-label">kg harvested this season</div>
+        </div>
+      </div>
+
+      <section class="f-card">
+        <h3>Needs attention</h3>
+
+        <div class="attn-row">
+          <div>
+            <div class="attn-title">Plot 12 · El Secà
+              <span class="f-chip f-chip--berry">3 missed waterings</span>
+            </div>
+            <small>The owner is traveling until next week and the chard is starting to sulk.</small>
+          </div>
+          <div>
+            <wired-button id="assign-open" class="f-primary" elevation="2">Assign cover</wired-button>
+            <span id="cover-done" class="cover-done" hidden>✓ <span id="cover-done-name"></span> will cover it this week</span>
+          </div>
+        </div>
+
+        <div class="attn-row">
+          <div>
+            <div class="attn-title">Compost bay 2
+              <span class="f-chip f-chip--green">ready</span>
+            </div>
+            <small>Ready to spread. The wheelbarrows are parked by the riera tap.</small>
+          </div>
+        </div>
+
+        <div class="attn-row">
+          <div>
+            <div class="attn-title">Fava sowing day
+              <span class="f-chip f-chip--sun">Saturday</span>
+            </div>
+            <small>Communal morning at Les Faves. Seeds are already waiting in the shed.</small>
+          </div>
+        </div>
+      </section>
+
+      <div class="panels-grid">
+
+        <section class="f-card">
+          <h3>Watering rota 💧</h3>
+          <table class="f-table" id="rota">
+            <thead>
+              <tr><th>Day</th><th>Waterer</th></tr>
+            </thead>
+            <tbody>
+              <tr data-day="1"><td>Monday</td><td>Pau</td></tr>
+              <tr data-day="2"><td>Tuesday</td><td>Marta</td></tr>
+              <tr data-day="3"><td>Wednesday</td><td>Omar</td></tr>
+              <tr data-day="4"><td>Thursday</td><td>Joana</td></tr>
+              <tr data-day="5"><td>Friday</td><td>Greta</td></tr>
+              <tr data-day="6"><td>Saturday</td><td>Communal morning</td></tr>
+              <tr data-day="0"><td>Sunday</td><td class="f-faint">Rest day</td></tr>
+            </tbody>
+          </table>
+          <small class="panel-foot">Water points: north tap · riera tap</small>
+        </section>
+
+        <section class="f-card">
+          <h3>Harvest by crop 🍅</h3>
+          <!-- Bars scaled to the biggest crop (tomàquets, 96 kg) -->
+          <div class="harvest-row">
+            <span class="harvest-crop">Tomàquets</span>
+            <div class="f-bar" style="width: 100%"></div>
+            <span class="harvest-kg">96 kg</span>
+          </div>
+          <div class="harvest-row">
+            <span class="harvest-crop">Carbassons</span>
+            <div class="f-bar" style="width: 77%"></div>
+            <span class="harvest-kg">74 kg</span>
+          </div>
+          <div class="harvest-row">
+            <span class="harvest-crop">Faves</span>
+            <div class="f-bar" style="width: 60%"></div>
+            <span class="harvest-kg">58 kg</span>
+          </div>
+          <div class="harvest-row">
+            <span class="harvest-crop">Bledes</span>
+            <div class="f-bar" style="width: 43%"></div>
+            <span class="harvest-kg">41 kg</span>
+          </div>
+          <div class="harvest-row">
+            <span class="harvest-crop">Herbes</span>
+            <div class="f-bar" style="width: 20%"></div>
+            <span class="harvest-kg">19 kg</span>
+          </div>
+          <div class="harvest-row">
+            <span class="harvest-crop">Altres</span>
+            <div class="f-bar" style="width: 25%"></div>
+            <span class="harvest-kg">24 kg</span>
+          </div>
+          <small class="panel-foot">312 kg so far this season</small>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<wired-dialog id="cover-dialog">
+  <div class="dialog-body">
+    <h3>Assign cover</h3>
+    <small>Who can water plot 12 (El Secà) this week?</small>
+    <wired-listbox id="cover-list">
+      <wired-item value="Pau">Pau · waters Mondays</wired-item>
+      <wired-item value="Marta">Marta · waters Tuesdays</wired-item>
+      <wired-item value="Omar">Omar · waters Wednesdays</wired-item>
+      <wired-item value="Joana">Joana · waters Thursdays</wired-item>
+      <wired-item value="Greta">Greta · waters Fridays</wired-item>
+    </wired-listbox>
+    <div class="dialog-actions">
+      <wired-button id="cover-cancel">Cancel</wired-button>
+      <wired-button id="cover-confirm" class="f-primary" disabled>Assign</wired-button>
+    </div>
+  </div>
+</wired-dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Greeting and date line follow the real clock */
+  var now = new Date();
+  var hour = now.getHours();
+  var greeting = hour < 12 ? 'Bon dia, Núria' : hour < 20 ? 'Bona tarda, Núria' : 'Bona nit, Núria';
+  document.getElementById('greeting').textContent = greeting;
+
+  var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+  document.getElementById('dateline').textContent =
+    dayNames[now.getDay()] + ' ' + now.getDate() + ' ' + monthNames[now.getMonth()] +
+    ' · the garden this week';
+
+  /* Highlight today's row in the rota */
+  var todayRow = document.querySelector('#rota tr[data-day="' + now.getDay() + '"]');
+  if (todayRow) {
+    todayRow.classList.add('is-today');
+    var chip = document.createElement('span');
+    chip.className = 'f-chip f-chip--sun';
+    chip.textContent = 'today';
+    todayRow.cells[0].appendChild(chip);
+  }
+
+  /* Assign-cover dialog */
+  var dialog = document.getElementById('cover-dialog');
+  var openBtn = document.getElementById('assign-open');
+  var cancelBtn = document.getElementById('cover-cancel');
+  var confirmBtn = document.getElementById('cover-confirm');
+  var listbox = document.getElementById('cover-list');
+  var chosen = null;
+
+  function setConfirmEnabled(enabled) {
+    confirmBtn.disabled = !enabled;
+    if (enabled) { confirmBtn.removeAttribute('disabled'); }
+    else { confirmBtn.setAttribute('disabled', ''); }
+  }
+
+  openBtn.addEventListener('click', function () {
+    dialog.open = true;
+    /* wired elements sketch their strokes at first layout; anything born inside
+       a closed dialog measured 0x0, so ask them to redraw once visible */
+    requestAnimationFrame(function () {
+      dialog.querySelectorAll('wired-listbox, wired-item, wired-button').forEach(function (el) {
+        if (el.requestUpdate) { el.requestUpdate(); }
+      });
+    });
+  });
+
+  listbox.addEventListener('selected', function (e) {
+    chosen = e.detail.selected;
+    setConfirmEnabled(true);
+  });
+
+  cancelBtn.addEventListener('click', function () {
+    dialog.open = false;
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    if (!chosen) { return; }
+    dialog.open = false;
+    openBtn.hidden = true;
+    document.getElementById('cover-done-name').textContent = chosen;
+    document.getElementById('cover-done').hidden = false;
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && dialog.open) { dialog.open = false; }
+  });
+})();
+</script>
+
+</body>
+</html>

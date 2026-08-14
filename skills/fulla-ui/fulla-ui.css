@@ -1,0 +1,235 @@
+/* Fulla — components
+   Hand-drawn UI on paper. wired-* elements draw their own rough strokes;
+   the .f-* classes here cover everything around them: paper, layout, type,
+   cards, stickies, stats, chips, tables. Tokens live in fulla-tokens.css. */
+
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("vendor/fonts/shantell-sans-var.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fulla-paper);
+  color: var(--fulla-ink);
+  font-family: var(--fulla-font-body);
+  font-size: var(--fulla-text-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .f-display {
+  font-family: var(--fulla-font-display);
+  color: var(--fulla-green-deep);
+  line-height: 1.15;
+  margin: 0 0 var(--fulla-s3);
+  font-weight: 700;
+}
+h1 { font-size: var(--fulla-text-3xl); }
+h2 { font-size: var(--fulla-text-2xl); }
+h3 { font-size: var(--fulla-text-xl); }
+h4 { font-size: var(--fulla-text-lg); }
+
+p { margin: 0 0 var(--fulla-s4); }
+a { color: var(--fulla-green); }
+small, .f-muted { color: var(--fulla-ink-soft); font-size: var(--fulla-text-sm); }
+.f-faint { color: var(--fulla-ink-faint); }
+
+wired-button, wired-input, wired-textarea, wired-combo, wired-item,
+wired-checkbox, wired-radio, wired-tab, wired-tabs, wired-search-input {
+  font-family: var(--fulla-font-display);
+  color: var(--fulla-ink);
+}
+wired-card { color: var(--fulla-ink); }
+
+/* Action colors: set `color` — wired strokes follow it. */
+.f-primary   { color: var(--fulla-green-deep); font-weight: 700; }
+.f-secondary { color: var(--fulla-clay); }
+.f-danger    { color: var(--fulla-berry); }
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+
+.f-row  { display: flex; gap: var(--fulla-s4); align-items: center; }
+.f-col  { display: flex; flex-direction: column; gap: var(--fulla-s4); }
+.f-grid { display: grid; gap: var(--fulla-s4); }
+.f-wrap { flex-wrap: wrap; }
+.f-between { justify-content: space-between; }
+.f-grow { flex: 1; }
+
+.f-page {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--fulla-s5);
+}
+
+/* Sidebar app frame (dashboards) */
+.f-app {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  min-height: 100vh;
+}
+.f-sidebar {
+  background: var(--fulla-paper-2);
+  border-right: var(--fulla-border);
+  padding: var(--fulla-s5) var(--fulla-s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fulla-s2);
+}
+.f-main { padding: var(--fulla-s6); min-width: 0; }
+
+.f-navlink {
+  display: block;
+  padding: var(--fulla-s2) var(--fulla-s3);
+  border-radius: var(--fulla-wobble-sm);
+  color: var(--fulla-ink);
+  text-decoration: none;
+  font-family: var(--fulla-font-display);
+  font-size: var(--fulla-text-md);
+}
+.f-navlink:hover { background: var(--fulla-paper-3); }
+.f-navlink.is-active {
+  background: var(--fulla-green);
+  color: var(--fulla-paper);
+  border: var(--fulla-border);
+  box-shadow: var(--fulla-shadow);
+}
+
+/* ── Surfaces ─────────────────────────────────────────────────────────── */
+
+/* Paper card for anything that isn't a wired-card */
+.f-card {
+  background: var(--fulla-white);
+  border: var(--fulla-border);
+  border-radius: var(--fulla-wobble);
+  box-shadow: var(--fulla-shadow);
+  padding: var(--fulla-s5);
+}
+.f-card--flat { box-shadow: none; }
+.f-card--soft { background: var(--fulla-paper-2); }
+
+/* Sticky note (same family as the review stickies) */
+.f-sticky {
+  background: var(--fulla-sticky);
+  border: 1px solid rgba(45, 58, 46, 0.25);
+  box-shadow: var(--fulla-shadow);
+  padding: var(--fulla-s4);
+  font-family: var(--fulla-font-display);
+  font-size: var(--fulla-text-sm);
+  transform: rotate(-0.6deg);
+}
+.f-sticky:nth-child(2n) { transform: rotate(0.8deg); }
+
+/* ── Bits ─────────────────────────────────────────────────────────────── */
+
+.f-stat { text-align: left; }
+.f-stat .f-stat-num {
+  font-family: var(--fulla-font-display);
+  font-size: var(--fulla-text-2xl);
+  font-weight: 800;
+  color: var(--fulla-green-deep);
+  line-height: 1;
+}
+.f-stat .f-stat-label {
+  color: var(--fulla-ink-soft);
+  font-size: var(--fulla-text-sm);
+  margin-top: var(--fulla-s1);
+}
+
+.f-chip {
+  display: inline-block;
+  padding: 0.1rem var(--fulla-s3);
+  border: 1.5px solid var(--fulla-ink);
+  border-radius: var(--fulla-wobble-sm);
+  font-family: var(--fulla-font-display);
+  font-size: var(--fulla-text-xs);
+  background: var(--fulla-paper-2);
+  white-space: nowrap;
+}
+.f-chip--green  { background: var(--fulla-green-soft); }
+.f-chip--sun    { background: var(--fulla-sun); }
+.f-chip--clay   { background: var(--fulla-clay); color: var(--fulla-white); }
+.f-chip--berry  { background: var(--fulla-berry); color: var(--fulla-white); }
+.f-chip--sky    { background: var(--fulla-sky); }
+
+.f-divider {
+  border: none;
+  border-top: 2px dashed var(--fulla-ink-faint);
+  margin: var(--fulla-s5) 0;
+}
+
+/* Hand-drawn table */
+.f-table { width: 100%; border-collapse: collapse; }
+.f-table th {
+  font-family: var(--fulla-font-display);
+  text-align: left;
+  font-size: var(--fulla-text-sm);
+  color: var(--fulla-green-deep);
+  border-bottom: var(--fulla-border);
+  padding: var(--fulla-s2) var(--fulla-s3);
+}
+.f-table td {
+  padding: var(--fulla-s3);
+  border-bottom: 1px dashed var(--fulla-ink-faint);
+  font-size: var(--fulla-text-sm);
+}
+.f-table tr:hover td { background: var(--fulla-paper-2); }
+
+/* Simple hand-drawn bar (charts without a chart library) */
+.f-bar {
+  height: 1.1rem;
+  background: var(--fulla-green-soft);
+  border: 1.5px solid var(--fulla-ink);
+  border-radius: var(--fulla-wobble-sm);
+}
+.f-bar--sun { background: var(--fulla-sun); }
+.f-bar--sky { background: var(--fulla-sky); }
+
+/* ── Mobile frame (phone prototypes) ─────────────────────────────────── */
+
+.f-phone {
+  max-width: 26rem;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--fulla-paper);
+  display: flex;
+  flex-direction: column;
+}
+.f-phone-body { flex: 1; padding: var(--fulla-s4); overflow-y: auto; }
+.f-tabbar {
+  display: flex;
+  border-top: var(--fulla-border);
+  background: var(--fulla-white);
+}
+.f-tabbar button {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: var(--fulla-s3) 0 calc(var(--fulla-s3) + env(safe-area-inset-bottom, 0px));
+  font-family: var(--fulla-font-display);
+  font-size: var(--fulla-text-xs);
+  color: var(--fulla-ink-soft);
+  cursor: pointer;
+}
+.f-tabbar button.is-active { color: var(--fulla-green-deep); font-weight: 700; }
+.f-tabbar .f-tabicon { display: block; font-size: 1.3rem; line-height: 1.2; }
+
+/* ── Odds and ends ────────────────────────────────────────────────────── */
+
+.f-logo {
+  font-family: var(--fulla-font-display);
+  font-weight: 800;
+  font-size: var(--fulla-text-xl);
+  color: var(--fulla-green-deep);
+  letter-spacing: 0.01em;
+}
+.f-logo .f-leaf { color: var(--fulla-sprout); }
+
+::selection { background: var(--fulla-green-soft); }

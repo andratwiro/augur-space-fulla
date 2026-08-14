@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive hand-drawn map of Hort de la Riera: click any plot to see its owner, crops and watering status.">
+<title>Hort de la Riera · garden map</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; overflow: hidden; }
+
+  /* ── The map fills the viewport ── */
+  #map {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  #map text { user-select: none; }
+
+  .plot { cursor: pointer; }
+  .plot .plot-shape {
+    stroke: var(--fulla-ink);
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    transition: stroke-width 0.12s ease;
+  }
+  .plot:hover .plot-shape,
+  .plot:focus-visible .plot-shape { stroke-width: 3.4; }
+  .plot:focus { outline: none; }
+  .plot.is-selected .plot-shape { stroke-width: 3.6; }
+  .plot.is-flagged .plot-shape { stroke: var(--fulla-berry); stroke-width: 2.6; }
+  .plot.is-flagged:hover .plot-shape,
+  .plot.is-flagged.is-selected .plot-shape,
+  .plot.is-flagged:focus-visible .plot-shape { stroke-width: 4; }
+
+  .plot-num {
+    font-family: var(--fulla-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    fill: var(--fulla-ink);
+    text-anchor: middle;
+    pointer-events: none;
+  }
+  .plot-emoji { font-size: 15px; text-anchor: middle; pointer-events: none; }
+
+  .map-label {
+    font-family: var(--fulla-font-display);
+    fill: var(--fulla-ink-soft);
+    text-anchor: middle;
+  }
+  .map-label--faint { fill: var(--fulla-ink-faint); }
+
+  /* ── Floating cards ── */
+  .float { position: fixed; z-index: 10; }
+
+  #header-card {
+    top: 1rem;
+    left: 1rem;
+    padding: var(--fulla-s4) var(--fulla-s5);
+    max-width: 17rem;
+  }
+  #header-card h1 {
+    font-size: var(--fulla-text-xl);
+    margin: 0 0 0.15rem;
+  }
+  #header-card .f-muted { display: block; }
+
+  #saturday-note {
+    top: 10.8rem;
+    left: 2.1rem;
+    max-width: 12rem;
+    padding: var(--fulla-s3);
+    z-index: 9;
+  }
+
+  #legend {
+    bottom: 1rem;
+    left: 1rem;
+    padding: var(--fulla-s3) var(--fulla-s4);
+    font-size: var(--fulla-text-xs);
+    color: var(--fulla-ink-soft);
+  }
+  #legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+  #legend li { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
+  .swatch {
+    display: inline-block;
+    width: 0.95rem; height: 0.75rem;
+    border: 1.5px solid var(--fulla-ink);
+    border-radius: var(--fulla-wobble-sm);
+    background: #d3e2c8;
+    flex: none;
+  }
+  .swatch--berry { border-color: var(--fulla-berry); border-width: 2px; background: #d3e2c8; }
+  .swatch--sand  { background: var(--fulla-paper-3); }
+  .legend-emoji { width: 0.95rem; text-align: center; flex: none; }
+
+  /* ── Detail panel ── */
+  #panel {
+    top: 1rem;
+    right: 1rem;
+    width: 21rem;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    transform: translateX(calc(100% + 2rem));
+    transition: transform 0.28s ease;
+  }
+  #panel.is-open { transform: translateX(0); }
+
+  #panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--fulla-s3); margin-bottom: var(--fulla-s2); }
+  #panel h2 { font-size: var(--fulla-text-xl); margin: 0.35rem 0 var(--fulla-s3); }
+  .panel-line { display: flex; gap: 0.5rem; align-items: baseline; margin: 0 0 var(--fulla-s2); font-size: var(--fulla-text-sm); }
+  .panel-line .who { font-family: var(--fulla-font-display); font-weight: 700; }
+  #panel-crops { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: var(--fulla-s2) 0 var(--fulla-s3); }
+
+  #alert-12 {
+    border: 2px solid var(--fulla-berry);
+    border-radius: var(--fulla-wobble-sm);
+    background: var(--fulla-paper-2);
+    padding: var(--fulla-s3);
+    margin-top: var(--fulla-s3);
+    font-size: var(--fulla-text-sm);
+  }
+  #alert-12 .alert-title {
+    font-family: var(--fulla-font-display);
+    font-weight: 700;
+    color: var(--fulla-berry);
+    margin-bottom: 0.25rem;
+  }
+  #cover-btn { margin-top: var(--fulla-s3); }
+  #cover-done {
+    margin-top: var(--fulla-s3);
+    font-family: var(--fulla-font-display);
+    font-weight: 700;
+    color: var(--fulla-green-deep);
+  }
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    #saturday-note { display: none; }
+    #legend { display: none; }
+    #panel {
+      top: auto; right: 0.75rem; left: 0.75rem; bottom: 0.75rem;
+      width: auto; max-height: 60vh;
+      transform: translateY(calc(100% + 2rem));
+    }
+    #panel.is-open { transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #panel, .plot .plot-shape { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg id="map" viewBox="0 0 1200 780" preserveAspectRatio="xMidYMid meet" aria-label="Map of Hort de la Riera">
+
+  <!-- ── The riera: a dry riverbed along the right edge ── -->
+  <g id="riera" aria-hidden="true">
+    <path d="M 1063 -10
+             C 1041 60, 1078 130, 1052 210
+             C 1030 278, 1066 340, 1048 420
+             C 1032 492, 1072 560, 1050 640
+             C 1034 700, 1060 750, 1046 790
+             L 1210 790 L 1210 -10 Z"
+          fill="var(--fulla-paper-3)" stroke="var(--fulla-ink)" stroke-width="2.2"
+          stroke-linejoin="round"/>
+    <!-- where water once ran -->
+    <path d="M 1122 -10 C 1098 90, 1136 180, 1108 290 C 1086 380, 1128 470, 1102 570 C 1082 650, 1118 720, 1104 790"
+          fill="none" stroke="var(--fulla-sky)" stroke-width="2.4"
+          stroke-dasharray="3 11" stroke-linecap="round" opacity="0.75"/>
+    <!-- stones -->
+    <g fill="var(--fulla-paper)" stroke="var(--fulla-ink-faint)" stroke-width="1.4">
+      <ellipse cx="1090" cy="70"  rx="9" ry="6" transform="rotate(-12 1090 70)"/>
+      <ellipse cx="1112" cy="84"  rx="6" ry="4.5" transform="rotate(18 1112 84)"/>
+      <ellipse cx="1145" cy="150" rx="10" ry="6.5" transform="rotate(8 1145 150)"/>
+      <ellipse cx="1078" cy="238" rx="7" ry="5" transform="rotate(-22 1078 238)"/>
+      <ellipse cx="1130" cy="312" rx="8" ry="5.5" transform="rotate(14 1130 312)"/>
+      <ellipse cx="1096" cy="392" rx="6" ry="4" transform="rotate(-8 1096 392)"/>
+      <ellipse cx="1150" cy="452" rx="9" ry="6" transform="rotate(20 1150 452)"/>
+      <ellipse cx="1082" cy="530" rx="7.5" ry="5" transform="rotate(-15 1082 530)"/>
+      <ellipse cx="1122" cy="606" rx="8" ry="5" transform="rotate(6 1122 606)"/>
+      <ellipse cx="1094" cy="688" rx="6.5" ry="4.5" transform="rotate(-18 1094 688)"/>
+      <ellipse cx="1142" cy="726" rx="9" ry="6" transform="rotate(10 1142 726)"/>
+    </g>
+    <text class="map-label map-label--faint" transform="translate(1178 340) rotate(90)"
+          font-size="19" letter-spacing="0.12em">la riera (seca)</text>
+  </g>
+
+  <!-- ── Paths between plot groups (dotted, faint) ── -->
+  <g id="paths" aria-hidden="true"
+     stroke="var(--fulla-ink-faint)" stroke-width="2" stroke-dasharray="1.5 9"
+     stroke-linecap="round" fill="none" opacity="0.85">
+    <path d="M 372 108 C 376 250, 368 520, 373 668"/>
+    <path d="M 678 108 C 674 250, 682 520, 677 668"/>
+    <path d="M 52 388 C 300 383, 700 392, 1000 386"/>
+  </g>
+  <text class="map-label map-label--faint" x="524" y="380" font-size="14">camí del mig</text>
+
+  <!-- ── Grass tufts ── -->
+  <g id="tufts" aria-hidden="true" stroke="var(--fulla-green-soft)" stroke-width="1.8"
+     stroke-linecap="round" fill="none">
+    <path d="M 30 210 l -4 -11 M 30 210 l 0 -13 M 30 210 l 5 -10"/>
+    <path d="M 372 82 l -4 -10 M 372 82 l 1 -12 M 372 82 l 5 -9"/>
+    <path d="M 40 520 l -4 -11 M 40 520 l 0 -13 M 40 520 l 5 -10"/>
+    <path d="M 1008 130 l -4 -10 M 1008 130 l 0 -12 M 1008 130 l 5 -9"/>
+    <path d="M 560 726 l -4 -11 M 560 726 l 0 -13 M 560 726 l 5 -10"/>
+    <path d="M 26 700 l -4 -10 M 26 700 l 1 -12 M 26 700 l 5 -9"/>
+  </g>
+
+  <!-- ── Tool shed ── -->
+  <g id="shed" aria-hidden="true">
+    <path d="M 428 700 L 432 752 L 514 749 L 511 698 Z"
+          fill="var(--fulla-clay)" opacity="0.85" stroke="var(--fulla-ink)" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M 420 702 L 470 668 L 522 699 Z"
+          fill="var(--fulla-paper-2)" stroke="var(--fulla-ink)" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M 460 752 L 461 720 L 482 719 L 483 751"
+          fill="var(--fulla-paper)" stroke="var(--fulla-ink)" stroke-width="1.8" stroke-linejoin="round"/>
+    <text class="map-label" x="472" y="772" font-size="14">tool shed 🛠️</text>
+  </g>
+
+  <!-- ── North arrow ── -->
+  <g id="north" aria-hidden="true" transform="translate(905 58)">
+    <path d="M 0 16 L 0 -14 M 0 -14 l -6 9 M 0 -14 l 6 9"
+          stroke="var(--fulla-ink-soft)" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <text class="map-label" x="0" y="34" font-size="14">N</text>
+  </g>
+
+  <!-- ── Water taps ── -->
+  <g id="tap-north" aria-hidden="true">
+    <circle cx="520" cy="66" r="17" fill="var(--fulla-white)" stroke="var(--fulla-sky)" stroke-width="2.4"/>
+    <text x="520" y="72" font-size="16" text-anchor="middle">💧</text>
+    <text class="map-label" x="520" y="103" font-size="14">north tap</text>
+  </g>
+  <g id="tap-riera" aria-hidden="true">
+    <!-- plank bridge over the bank -->
+    <path d="M 996 428 l 40 -6 M 998 438 l 40 -6 M 1000 448 l 38 -5"
+          stroke="var(--fulla-clay)" stroke-width="3.4" stroke-linecap="round" fill="none" opacity="0.9"/>
+    <circle cx="1058" cy="430" r="17" fill="var(--fulla-white)" stroke="var(--fulla-sky)" stroke-width="2.4"/>
+    <text x="1058" y="436" font-size="16" text-anchor="middle">💧</text>
+    <text class="map-label" x="1052" y="468" font-size="14">riera tap</text>
+  </g>
+
+  <!-- ── Compost bays ── -->
+  <g id="compost" aria-hidden="true">
+    <g stroke="var(--fulla-ink)" stroke-width="2" stroke-linejoin="round">
+      <path d="M 636 690 l 3 42 46 -2 -2 -41 Z" fill="var(--fulla-paper-2)"/>
+      <path d="M 696 688 l 1 43 47 -1 -1 -42 Z" fill="#cbbf9b"/>
+      <path d="M 756 690 l 2 41 46 -2 -3 -41 Z" fill="var(--fulla-paper-2)"/>
+    </g>
+    <text x="660" y="717" font-size="15" text-anchor="middle">♻️</text>
+    <text x="720" y="716" font-size="15" text-anchor="middle">♻️</text>
+    <text x="780" y="717" font-size="15" text-anchor="middle">♻️</text>
+    <!-- bay 2 "ready" badge -->
+    <g transform="rotate(-4 721 682)">
+      <rect x="698" y="672" width="47" height="20" rx="9" ry="7"
+            fill="var(--fulla-sun)" stroke="var(--fulla-ink)" stroke-width="1.6"/>
+      <text x="721.5" y="686.5" font-size="12" text-anchor="middle"
+            font-family="var(--fulla-font-display)" font-weight="700"
+            fill="var(--fulla-ink)">ready</text>
+    </g>
+    <text class="map-label" x="720" y="754" font-size="14">compost</text>
+  </g>
+
+  <!-- ── Plots (drawn by script) ── -->
+  <g id="plots"></g>
+</svg>
+
+<!-- ── Header card ── -->
+<div id="header-card" class="f-card float">
+  <h1><span class="f-leaf">🌿</span> Hort de la Riera</h1>
+  <small class="f-muted">48 plots · 61 members</small>
+  <small class="f-faint">9 on the waitlist</small>
+</div>
+
+<div id="saturday-note" class="f-sticky float">
+  Saturday: fava sowing, communal morning 🫘
+</div>
+
+<!-- ── Legend ── -->
+<div id="legend" class="f-card f-card--flat float">
+  <ul>
+    <li><span class="swatch"></span> plot (click one)</li>
+    <li><span class="swatch swatch--berry"></span> needs attention</li>
+    <li><span class="legend-emoji">💧</span> water tap</li>
+    <li><span class="legend-emoji">♻️</span> compost, bay 2 ready</li>
+    <li><span class="swatch swatch--sand"></span> the dry riera</li>
+  </ul>
+</div>
+
+<!-- ── Detail panel ── -->
+<aside id="panel" class="f-card float" role="dialog" aria-label="Plot details" aria-hidden="true">
+  <div id="panel-head">
+    <span id="panel-chip" class="f-chip f-chip--green">Plot 1</span>
+    <wired-icon-button id="panel-close" aria-label="Close plot details">✕</wired-icon-button>
+  </div>
+  <h2 id="panel-name">Plot</h2>
+  <p class="panel-line">🧑‍🌾 <span class="who" id="panel-owner"></span></p>
+  <div id="panel-crops"></div>
+  <p class="panel-line">💧 <span id="panel-watered"></span></p>
+  <p class="panel-line f-muted hidden" id="panel-note"><span id="panel-note-text"></span></p>
+
+  <div id="alert-12" class="hidden">
+    <div class="alert-title">⚠️ 3 missed waterings</div>
+    <div>Íngrid is traveling until next week. The rota can cover it.</div>
+    <wired-button id="cover-btn" class="f-primary" elevation="2">Assign cover</wired-button>
+    <div id="cover-done" class="hidden">✓ Cover assigned. Pau takes this week's waterings.</div>
+  </div>
+</aside>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── Deterministic hash: stable between loads, no Math.random ── */
+  function h(n, k) {
+    var x = Math.imul(n + 1, 2654435761) ^ Math.imul(k + 17, 40503);
+    x ^= x >>> 13;
+    x = Math.imul(x, 2246822519);
+    x ^= x >>> 16;
+    return (x >>> 0) / 4294967296;
+  }
+  function pick(arr, n, k) { return arr[Math.floor(h(n, k) * arr.length)]; }
+
+  /* ── Demo data (context.md is the source of truth) ── */
+  var NAMED = {
+    7:  { name: "Les Faves", owner: "Joana",
+          crops: ["Faves", "Pèsols", "Ceba tendra"],
+          watered: "Last watered 2 days ago",
+          note: "Beds prepped for Saturday's fava sowing." },
+    12: { name: "El Secà", owner: "Íngrid",
+          crops: ["Tomàquet de penjar", "Alls"],
+          watered: "Last watered 8 days ago",
+          flagged: true },
+    23: { name: "Tomàquets de la Marta", owner: "Marta", emoji: "🍅",
+          crops: ["Tomàquet cor de bou", "Tomàquet de penjar", "Alfàbrega"],
+          watered: "Last watered yesterday (Marta's rota day)",
+          note: "96 kg of tomatoes this season and counting." },
+    31: { name: "Racó de les Herbes", owner: "Assumpta", emoji: "🌿",
+          crops: ["Romaní", "Farigola", "Menta", "Sàlvia"],
+          watered: "Last watered 3 days ago" },
+    40: { name: "Bancal Nou", owner: "Omar", emoji: "🌱",
+          crops: ["Bledes", "Carbassó"],
+          watered: "Watered today",
+          note: "Freshly dug this spring, first season in use." }
+  };
+
+  var OWNERS = ["Pau", "Greta", "Toni", "Jordi", "Mercè", "Quim", "Laia",
+                "Pere", "Rosa", "Enric", "Montse", "Xavi", "Carme", "Biel",
+                "Neus", "Oriol", "Dolors", "Ramon"];
+  var CROPS = ["Tomàquets", "Carbassó", "Bledes", "Enciams", "Cebes", "Alls",
+               "Pebrots", "Albergínies", "Faves", "Maduixes", "Espinacs",
+               "Porros", "Cols", "Raves"];
+  var WATERED = ["Watered today", "Last watered yesterday",
+                 "Last watered 2 days ago", "Last watered 3 days ago"];
+
+  function plotData(n) {
+    if (NAMED[n]) return NAMED[n];
+    var a = pick(CROPS, n, 2);
+    var b = pick(CROPS, n, 3);
+    if (b === a) b = CROPS[(CROPS.indexOf(a) + 5) % CROPS.length];
+    var crops = [a, b];
+    if (h(n, 4) > 0.55) {
+      var c = pick(CROPS, n, 5);
+      if (crops.indexOf(c) === -1) crops.push(c);
+    }
+    return {
+      name: null,
+      owner: pick(OWNERS, n, 1),
+      crops: crops,
+      watered: pick(WATERED, n, 6)
+    };
+  }
+
+  /* ── Draw the 48 plots: 4 rows × 12 cols, gaps between groups of 4 ── */
+  var SVG = "http://www.w3.org/2000/svg";
+  var plotsG = document.getElementById("plots");
+  var W = 66, H = 118;
+
+  function colX(c) {
+    var extra = c >= 8 ? 44 : (c >= 4 ? 22 : 0);
+    return 58 + c * 74 + extra;
+  }
+  function rowY(r) { return [120, 252, 410, 542][r]; }
+
+  function wobblyRect(x, y, w, hgt, n) {
+    // corner jitter + bowed edges, all from the plot-number hash
+    function j(k) { return (h(n, k) - 0.5) * 5; }
+    var x1 = x + j(10),      y1 = y + j(11);
+    var x2 = x + w + j(12),  y2 = y + j(13);
+    var x3 = x + w + j(14),  y3 = y + hgt + j(15);
+    var x4 = x + j(16),      y4 = y + hgt + j(17);
+    function mid(a, b, k) { return (a + b) / 2 + (h(n, k) - 0.5) * 4; }
+    return "M " + x1 + " " + y1 +
+      " Q " + mid(x1, x2, 20) + " " + (mid(y1, y2, 21) - 1.5) + " " + x2 + " " + y2 +
+      " Q " + (mid(x2, x3, 22) + 1.5) + " " + mid(y2, y3, 23) + " " + x3 + " " + y3 +
+      " Q " + mid(x3, x4, 24) + " " + (mid(y3, y4, 25) + 1.5) + " " + x4 + " " + y4 +
+      " Q " + (mid(x4, x1, 26) - 1.5) + " " + mid(y4, y1, 27) + " " + x1 + " " + y1 + " Z";
+  }
+
+  var FILLS = ["#dfe8d3", "#d3e2c8", "#e7ead2", "#cfdfc4", "#e3e6cf"];
+
+  for (var n = 1; n <= 48; n++) {
+    var r = Math.floor((n - 1) / 12), c = (n - 1) % 12;
+    var x = colX(c), y = rowY(r);
+    var cx = x + W / 2, cy = y + H / 2;
+    var d = plotData(n);
+
+    var g = document.createElementNS(SVG, "g");
+    g.setAttribute("class", "plot" + (d.flagged ? " is-flagged" : ""));
+    g.setAttribute("data-plot", n);
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.setAttribute("aria-label", "Plot " + n + (d.name ? ", " + d.name : ""));
+    var rot = (h(n, 30) - 0.5) * 2.6;
+    g.setAttribute("transform", "rotate(" + rot.toFixed(2) + " " + cx + " " + cy + ")");
+
+    var path = document.createElementNS(SVG, "path");
+    path.setAttribute("class", "plot-shape");
+    path.setAttribute("d", wobblyRect(x, y, W, H, n));
+    path.setAttribute("fill", n === 12 ? "#ecdfc0" : pick(FILLS, n, 40));
+    g.appendChild(path);
+
+    var num = document.createElementNS(SVG, "text");
+    num.setAttribute("class", "plot-num");
+    num.setAttribute("x", cx);
+    num.setAttribute("y", d.emoji || d.flagged ? cy - 4 : cy + 5);
+    num.textContent = n;
+    g.appendChild(num);
+
+    if (d.emoji || d.flagged) {
+      var em = document.createElementNS(SVG, "text");
+      em.setAttribute("class", "plot-emoji");
+      em.setAttribute("x", cx);
+      em.setAttribute("y", cy + 18);
+      em.textContent = d.flagged ? "⚠️" : d.emoji;
+      g.appendChild(em);
+    }
+    plotsG.appendChild(g);
+  }
+
+  /* ── Panel ── */
+  var panel = document.getElementById("panel");
+  var chip = document.getElementById("panel-chip");
+  var nameEl = document.getElementById("panel-name");
+  var ownerEl = document.getElementById("panel-owner");
+  var cropsEl = document.getElementById("panel-crops");
+  var wateredEl = document.getElementById("panel-watered");
+  var noteLine = document.getElementById("panel-note");
+  var noteText = document.getElementById("panel-note-text");
+  var alert12 = document.getElementById("alert-12");
+  var coverBtn = document.getElementById("cover-btn");
+  var coverDone = document.getElementById("cover-done");
+  var coverAssigned = false;
+  var selected = null;
+
+  function openPanel(n) {
+    var d = plotData(n);
+    chip.textContent = "Plot " + n;
+    chip.className = "f-chip " + (d.flagged ? "f-chip--berry" : "f-chip--green");
+    nameEl.textContent = d.name || "Plot " + n;
+    ownerEl.textContent = d.owner;
+    cropsEl.innerHTML = "";
+    d.crops.forEach(function (crop) {
+      var s = document.createElement("span");
+      s.className = "f-chip";
+      s.textContent = "🌱 " + crop;
+      cropsEl.appendChild(s);
+    });
+    wateredEl.textContent = d.watered;
+    if (d.note) {
+      noteText.textContent = d.note;
+      noteLine.classList.remove("hidden");
+    } else {
+      noteLine.classList.add("hidden");
+    }
+    if (n === 12) {
+      alert12.classList.remove("hidden");
+      coverBtn.classList.toggle("hidden", coverAssigned);
+      coverDone.classList.toggle("hidden", !coverAssigned);
+    } else {
+      alert12.classList.add("hidden");
+    }
+    panel.classList.add("is-open");
+    panel.setAttribute("aria-hidden", "false");
+
+    if (selected) selected.classList.remove("is-selected");
+    selected = plotsG.querySelector('[data-plot="' + n + '"]');
+    if (selected) selected.classList.add("is-selected");
+  }
+
+  function closePanel() {
+    panel.classList.remove("is-open");
+    panel.setAttribute("aria-hidden", "true");
+    if (selected) { selected.classList.remove("is-selected"); selected = null; }
+  }
+
+  coverBtn.addEventListener("click", function () {
+    coverAssigned = true;
+    coverBtn.classList.add("hidden");
+    coverDone.classList.remove("hidden");
+  });
+
+  document.getElementById("panel-close").addEventListener("click", closePanel);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closePanel();
+  });
+
+  /* Click a plot to open; click the paper (anywhere else on the map) to close */
+  var map = document.getElementById("map");
+  map.addEventListener("click", function (e) {
+    var g = e.target.closest ? e.target.closest(".plot") : null;
+    if (g) openPanel(parseInt(g.getAttribute("data-plot"), 10));
+    else closePanel();
+  });
+  map.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var g = e.target.closest ? e.target.closest(".plot") : null;
+    if (g) { e.preventDefault(); openPanel(parseInt(g.getAttribute("data-plot"), 10)); }
+  });
+})();
+</script>
+</body>
+</html>

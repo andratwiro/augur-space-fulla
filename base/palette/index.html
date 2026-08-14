@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fulla's palette: paper surfaces, green ink, garden accents.">
+<title>Palette — Fulla</title>
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../skills/fulla-ui/fulla-ui.css">
+<style>
+  .swatches { grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); }
+  .swatch { border: var(--fulla-border); border-radius: var(--fulla-wobble-sm); overflow: hidden; background: var(--fulla-white); }
+  .swatch .well { height: 4.5rem; }
+  .swatch .meta { padding: var(--fulla-s2) var(--fulla-s3); }
+  .swatch code { font-size: var(--fulla-text-xs); color: var(--fulla-ink-soft); }
+</style>
+</head>
+<body>
+<main class="f-page">
+  <h1>Palette</h1>
+  <p class="f-muted">Paper to sit on, ink to draw with, a garden of accents. Tokens live in <code>fulla-tokens.css</code>.</p>
+  <div class="f-grid swatches" id="swatches"></div>
+</main>
+<script>
+  var groups = [
+    ["Paper", ["--fulla-paper", "--fulla-paper-2", "--fulla-paper-3", "--fulla-white"]],
+    ["Ink", ["--fulla-ink", "--fulla-ink-soft", "--fulla-ink-faint"]],
+    ["Greens", ["--fulla-green", "--fulla-green-deep", "--fulla-green-soft", "--fulla-sprout"]],
+    ["Accents", ["--fulla-sun", "--fulla-clay", "--fulla-berry", "--fulla-sky", "--fulla-sticky"]],
+  ];
+  var root = getComputedStyle(document.documentElement);
+  var out = [];
+  groups.forEach(function (g) {
+    out.push('<h3 style="grid-column:1/-1;margin:1rem 0 0">' + g[0] + "</h3>");
+    g[1].forEach(function (v) {
+      var val = root.getPropertyValue(v).trim();
+      out.push('<div class="swatch"><div class="well" style="background:var(' + v + ')"></div>' +
+        '<div class="meta"><strong>' + v.replace("--fulla-", "") + "</strong><br><code>" + val + "</code></div></div>");
+    });
+  });
+  document.getElementById("swatches").innerHTML = out.join("");
+</script>
+</body>
+</html>
