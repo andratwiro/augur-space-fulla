@@ -25,6 +25,19 @@ Catalan town. 48 plots, 61 members, 9 people on the waitlist.
 - **Rota:** Mon Pau · Tue Marta · Wed Omar · Thu Joana · Fri Greta ·
   Sat communal morning · Sun rest
 
+## Sibling projects
+
+The garden is no longer the only folder. Each sibling keeps its own brief for its own
+data, and defers to this file for anything about the garden itself. Nobody who already
+holds a plot here can appear on the waitlist.
+
+- `toolshed/` — the shed and what is out of it. See `toolshed/context.md`.
+- `waitlist/` — the nine people waiting, and the card that goes to them each season.
+  See `waitlist/context.md`.
+- `almanac/` — the sowing year and why it disagrees with the seed packets.
+  See `almanac/context.md`.
+- `signage/` — what gets printed and nailed to a plot.
+
 ## Voice
 
 Informal, warm, designer-to-designer. Everything reads in English; Catalan
