@@ -33,7 +33,8 @@ garden/
     ├── coordinator-dashboard    the coordinator's desktop overview
     ├── plot-care                mobile member app, three tabs
     ├── garden-map               clickable hand-drawn map of the 48 plots
-    └── seed-pod-3d              spinning botanical specimen for live tiles
+    ├── seed-pod-3d              spinning botanical specimen for live tiles
+    └── seed-swap                noticeboard of spare saved seeds
 almanac/prototypes/sowing-wheel  the year as a wheel
 signage/prototypes/plot-sign     printable A5 plot signs
 base/ components/         gallery tier demos

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A members' noticeboard of spare saved seeds, where claiming an offer settles the card without taking it off the board.">
+<title>Fulla · Seed swap</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  /* ── Prototype-local styles (a pinned-up board on top of the DS) ── */
+
+  .board-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fulla-s3);
+    padding: var(--fulla-s3) var(--fulla-s5);
+    border-bottom: 2px dashed var(--fulla-ink-faint);
+    background: var(--fulla-paper);
+  }
+  .avatar {
+    width: 2.1rem;
+    height: 2.1rem;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--fulla-border);
+    border-radius: 50%;
+    font-family: var(--fulla-font-display);
+    font-weight: 700;
+    color: var(--fulla-white);
+  }
+
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--fulla-s5);
+    margin-bottom: var(--fulla-s5);
+  }
+  .page-head h1 { margin-bottom: var(--fulla-s2); }
+  .page-head p { margin-bottom: var(--fulla-s3); max-width: 34rem; }
+  .head-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--fulla-s4);
+    max-width: 19rem;
+  }
+  .shed-note { max-width: 19rem; }
+
+  /* ── The offer form ── */
+  .offer-form { margin-bottom: var(--fulla-s5); }
+  .offer-form h4 { margin-bottom: var(--fulla-s4); }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--fulla-s4);
+    margin-bottom: var(--fulla-s4);
+  }
+  .form-grid label,
+  .offer-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fulla-s1);
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-sm);
+    color: var(--fulla-green-deep);
+  }
+  .offer-form wired-input,
+  .offer-form wired-textarea { display: block; width: 100%; }
+  .offer-form .from-line { margin: var(--fulla-s3) 0 0; }
+  .offer-form .form-actions { margin-top: var(--fulla-s4); }
+  #offer-error { margin: var(--fulla-s3) 0 0; font-family: var(--fulla-font-display); }
+
+  /* ── The board ── */
+  .board {
+    grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+    gap: var(--fulla-s5);
+    align-items: stretch;
+  }
+  /* .f-grid sets display, so it has to be undone by hand when the board empties. */
+  .board[hidden] { display: none; }
+  .offer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fulla-s3);
+    transition: background 0.35s ease, box-shadow 0.35s ease,
+                transform 0.35s ease, border-color 0.35s ease, opacity 0.35s ease;
+  }
+  /* A board of pinned paper never hangs straight. */
+  .board .offer:nth-child(2n) { transform: rotate(0.5deg); }
+  .board .offer:nth-child(3n) { transform: rotate(-0.6deg); }
+
+  .offer .crop {
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-lg);
+    font-weight: 700;
+    color: var(--fulla-green-deep);
+    line-height: 1.2;
+  }
+  .offer .crop-emoji { margin-right: var(--fulla-s1); }
+  .offer .state { flex: none; }
+  .offer .amount .f-stat-num { font-size: var(--fulla-text-xl); }
+  .offer .note { margin: 0; font-size: var(--fulla-text-sm); color: var(--fulla-ink-soft); }
+  .offer .offer-by { gap: var(--fulla-s2); }
+  .offer .offer-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--fulla-s2);
+    margin-top: auto;
+    padding-top: var(--fulla-s2);
+    border-top: 1px dashed var(--fulla-ink-faint);
+    min-height: 3rem;
+  }
+  .offer .settled-line {
+    font-family: var(--fulla-font-display);
+    font-size: var(--fulla-text-sm);
+    color: var(--fulla-green-deep);
+  }
+
+  /* Claimed: the card stays up, it just stops shouting. */
+  .board .offer.is-settled {
+    background: var(--fulla-paper-2);
+    border-color: var(--fulla-ink-faint);
+    box-shadow: none;
+    transform: none;
+    opacity: 0.85;
+  }
+  .offer.is-settled .crop,
+  .offer.is-settled .amount .f-stat-num { color: var(--fulla-ink-soft); }
+  .offer.is-settled .settled-line { color: var(--fulla-ink-soft); }
+
+  .offer.is-new { animation: pinup 1.6s ease-out; }
+  @keyframes pinup {
+    0%   { background: var(--fulla-green-soft); }
+    100% { background: var(--fulla-white); }
+  }
+
+  /* ── Nothing on the board ── */
+  .empty {
+    text-align: center;
+    background: var(--fulla-paper-2);
+    border: 2px dashed var(--fulla-ink-faint);
+    padding: var(--fulla-s7) var(--fulla-s5);
+  }
+  .empty .empty-mark { font-size: 2.6rem; line-height: 1; margin-bottom: var(--fulla-s3); }
+  .empty p { max-width: 26rem; margin: 0 auto var(--fulla-s5); color: var(--fulla-ink-soft); }
+
+  /* Scaffolding so the bare board is reachable in review. Not the screen. */
+  .proto-note {
+    display: flex;
+    align-items: center;
+    gap: var(--fulla-s3);
+    font-size: var(--fulla-text-sm);
+  }
+</style>
+</head>
+<body>
+
+<header class="board-top">
+  <span class="f-logo">fulla<span class="f-leaf">🌿</span></span>
+  <small>Hort de la Riera</small>
+  <span class="avatar" style="background: #a54657;" title="Marta · plot 23">M</span>
+</header>
+
+<div class="f-page">
+
+  <div class="page-head">
+    <div>
+      <h1>Seed swap</h1>
+      <p>What members saved from their own plots and have too much of. Take what you will sow this year, leave the rest for the next person.</p>
+      <div class="f-row f-wrap" style="gap: var(--fulla-s2);" id="counts"></div>
+    </div>
+    <div class="head-side">
+      <wired-button class="f-primary" id="offer-open">Offer seeds</wired-button>
+      <div class="f-sticky shed-note">
+        Claiming here only holds it for you. The jars live on the shelf by the shed door, take yours next time you pass 🫙
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Pin something up ─────────────────────────────────────── -->
+  <section class="f-card offer-form" id="offer-form" hidden>
+    <h4>Offer some seeds</h4>
+    <div class="form-grid">
+      <label>What did you save?
+        <wired-input id="crop-input" placeholder="Fava beans"></wired-input>
+      </label>
+      <label>Roughly how many?
+        <wired-input id="amount-input" placeholder="~40 seeds"></wired-input>
+      </label>
+    </div>
+    <label class="field">Anything worth knowing?
+      <wired-textarea id="note-input" rows="2" placeholder="How they dried, how they grew, what they taste like."></wired-textarea>
+    </label>
+    <p class="f-muted from-line">Goes up as Marta, saved from plot 23 · Marta's Tomatoes.</p>
+    <p class="f-danger" id="offer-error" hidden>Give it a name and a rough count 🌱</p>
+    <div class="f-row form-actions">
+      <wired-button class="f-primary" id="offer-submit">Pin it up</wired-button>
+      <wired-button class="f-secondary" id="offer-cancel">Not now</wired-button>
+    </div>
+  </section>
+
+  <!-- ── The board ────────────────────────────────────────────── -->
+  <div class="f-grid board" id="board"></div>
+
+  <section class="f-card f-card--flat empty" id="empty" hidden>
+    <div class="empty-mark">🌱</div>
+    <h3>The board is bare</h3>
+    <p>Somebody has to go first. Shake an envelope out of whatever you saved this year and pin it up, the rest of the garden usually follows within a day.</p>
+    <wired-button class="f-primary" id="empty-offer">Offer some seeds</wired-button>
+  </section>
+
+  <hr class="f-divider">
+  <p class="f-faint proto-note">
+    <span>Prototype scaffolding, not part of the screen:</span>
+    <wired-button class="f-secondary" id="toggle-empty">empty the board</wired-button>
+  </p>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Who is looking ── */
+  var ME = { name: 'Marta', initial: 'M', color: '#a54657', plot: "23 · Marta's Tomatoes" };
+
+  /* ── The board (in memory, no backend) ──
+     claimedBy: null (going spare) | "me" | a member's name.
+     take: what the claim button says. Each offer keeps its own words, so the
+     button asks for the thing on the card and not for "these". */
+  var OFFERS = [
+    {
+      id: 'fava', emoji: '🫘', crop: 'Fava beans',
+      amount: '~40 seeds', plot: '7 · The Fava Beds',
+      by: 'Pau', initial: 'P', color: '#7da7c4', when: 'saved in August',
+      note: "From the row along the path. They shrugged off the frost last winter and came up thick.",
+      take: 'Claim the envelope', claimedBy: null
+    },
+    {
+      id: 'chard', emoji: '🥬', crop: 'Chard, the stripy one',
+      amount: '~60 seeds', plot: '34', by: 'Omar', initial: 'O', color: '#e6aa3a',
+      when: 'saved in July',
+      note: "From the plants that bolted in the heat. Stems come up pink, yellow, sometimes white.",
+      take: 'Claim the packet', claimedBy: 'Joana'
+    },
+    {
+      id: 'calendula', emoji: '🌼', crop: 'Calendula',
+      amount: 'a big handful', plot: '18', by: 'Joana', initial: 'J', color: '#c17a56',
+      when: 'saved in September',
+      note: "They reseed themselves everywhere, so take plenty. The bees get to them before anything else does.",
+      take: 'Claim a handful', claimedBy: null
+    },
+    {
+      id: 'tomato', emoji: '🍅', crop: 'Tomatoes, the ribbed ones',
+      amount: '~25 seeds', plot: ME.plot,
+      by: ME.name, initial: ME.initial, color: ME.color, when: 'saved in August',
+      note: "Fermented in a glass for three days and dried on paper. Ugly fruit, very good sauce.",
+      take: 'Claim the twist of paper', claimedBy: null, mine: true
+    },
+    {
+      id: 'basil', emoji: '🌿', crop: 'Basil',
+      amount: 'two pinches', plot: '41', by: 'Greta', initial: 'G', color: '#8d998f',
+      when: 'saved last week',
+      note: "One flower spike shaken into an envelope. Sow them thicker than feels right, they are tiny.",
+      take: 'Claim a pinch', claimedBy: null
+    },
+    {
+      id: 'sunflower', emoji: '🌻', crop: 'Sunflower',
+      amount: 'half a jam jar', plot: '29', by: 'Toni', initial: 'T', color: '#4a7c59',
+      when: 'saved in September',
+      note: "From the tall one by the compost bays, the one everybody photographed. Squirrels had the rest.",
+      take: 'Claim the jar', claimedBy: null
+    }
+  ];
+
+  var boardEl = document.getElementById('board');
+  var emptyEl = document.getElementById('empty');
+  var countsEl = document.getElementById('counts');
+  var formEl = document.getElementById('offer-form');
+  var errorEl = document.getElementById('offer-error');
+  var cropInput = document.getElementById('crop-input');
+  var amountInput = document.getElementById('amount-input');
+  var noteInput = document.getElementById('note-input');
+
+  /* ── Little helpers ── */
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) { node.className = cls; }
+    if (text !== undefined && text !== null) { node.textContent = text; }
+    return node;
+  }
+
+  function button(label, cls) {
+    var b = document.createElement('wired-button');
+    b.className = cls;
+    b.textContent = label;
+    return b;
+  }
+
+  /* wired-* elements draw themselves against their box, so anything that
+     first rendered while hidden needs a nudge once it is on screen. */
+  function redrawWired(root) {
+    var kids = root.querySelectorAll('*');
+    for (var i = 0; i < kids.length; i++) {
+      if (typeof kids[i].requestUpdate === 'function') { kids[i].requestUpdate(); }
+    }
+  }
+
+  /* ── One card ── */
+  function chipFor(offer) {
+    if (offer.claimedBy === 'me') { return { cls: 'f-chip f-chip--sky', text: 'yours' }; }
+    if (offer.claimedBy) { return { cls: 'f-chip', text: 'claimed' }; }
+    if (offer.mine) { return { cls: 'f-chip f-chip--sun', text: 'your offer' }; }
+    return { cls: 'f-chip f-chip--green', text: 'going spare' };
+  }
+
+  function fillFoot(offer, foot) {
+    foot.textContent = '';
+    var btn;
+
+    if (offer.claimedBy === 'me') {
+      foot.appendChild(el('span', 'settled-line', 'Yours. Pick them up at the shed 🤝'));
+      btn = button('changed my mind', 'f-secondary');
+      btn.addEventListener('click', function () { setClaim(offer, null); });
+      foot.appendChild(btn);
+    } else if (offer.claimedBy) {
+      foot.appendChild(el('span', 'settled-line', offer.claimedBy + ' is taking these.'));
+    } else if (offer.mine) {
+      foot.appendChild(el('span', 'settled-line', 'Up since Tuesday.'));
+      btn = button('take it down', 'f-secondary');
+      btn.addEventListener('click', function () { withdraw(offer); });
+      foot.appendChild(btn);
+    } else {
+      btn = button(offer.take || 'Claim these', 'f-primary');
+      btn.addEventListener('click', function () { setClaim(offer, 'me'); });
+      foot.appendChild(btn);
+    }
+  }
+
+  function buildCard(offer) {
+    var card = el('article', 'f-card offer');
+    card.setAttribute('data-offer', offer.id);
+
+    var head = el('div', 'f-row f-between');
+    var crop = el('span', 'crop');
+    crop.appendChild(el('span', 'crop-emoji', offer.emoji));
+    crop.appendChild(document.createTextNode(offer.crop));
+    head.appendChild(crop);
+    var chip = chipFor(offer);
+    head.appendChild(el('span', chip.cls + ' state', chip.text));
+    card.appendChild(head);
+
+    var stat = el('div', 'f-stat amount');
+    stat.appendChild(el('div', 'f-stat-num', offer.amount));
+    stat.appendChild(el('div', 'f-stat-label', 'saved from plot ' + offer.plot));
+    card.appendChild(stat);
+
+    card.appendChild(el('p', 'note', offer.note));
+
+    var by = el('div', 'f-row offer-by');
+    var av = el('span', 'avatar', offer.initial);
+    av.style.background = offer.color;
+    by.appendChild(av);
+    by.appendChild(el('small', null, offer.by + ' · ' + offer.when));
+    card.appendChild(by);
+
+    var foot = el('div', 'offer-foot');
+    fillFoot(offer, foot);
+    card.appendChild(foot);
+
+    if (offer.claimedBy) { card.classList.add('is-settled'); }
+    if (offer.isNew) { card.classList.add('is-new'); }
+    return card;
+  }
+
+  /* ── State changes ──
+     Claiming leaves the card exactly where it is on the board and only
+     changes how loud it looks, so the card is updated in place. */
+  function setClaim(offer, who) {
+    offer.claimedBy = who;
+    var card = boardEl.querySelector('[data-offer="' + offer.id + '"]');
+    if (card) {
+      card.classList.toggle('is-settled', !!who);
+      var chip = chipFor(offer);
+      var chipEl = card.querySelector('.state');
+      chipEl.className = chip.cls + ' state';
+      chipEl.textContent = chip.text;
+      fillFoot(offer, card.querySelector('.offer-foot'));
+    }
+    refreshCounts();
+  }
+
+  function withdraw(offer) {
+    for (var i = 0; i < OFFERS.length; i++) {
+      if (OFFERS[i] === offer) { OFFERS.splice(i, 1); break; }
+    }
+    render();
+  }
+
+  /* Nobody counted the jars, so the board does not pretend to either. */
+  function looseCount(n) {
+    if (n === 1) { return 'one'; }
+    if (n === 2) { return 'a couple'; }
+    if (n <= 4) { return 'a few'; }
+    if (n <= 7) { return 'a handful'; }
+    return 'plenty';
+  }
+
+  function refreshCounts() {
+    var spare = 0, claimed = 0;
+    for (var i = 0; i < OFFERS.length; i++) {
+      if (OFFERS[i].claimedBy) { claimed++; } else { spare++; }
+    }
+    countsEl.textContent = '';
+    if (spare) {
+      countsEl.appendChild(el('span', 'f-chip f-chip--green',
+        looseCount(spare) + ' going spare'));
+    }
+    if (claimed) {
+      countsEl.appendChild(el('span', 'f-chip', looseCount(claimed) + ' spoken for'));
+    }
+  }
+
+  function render() {
+    boardEl.textContent = '';
+    for (var i = 0; i < OFFERS.length; i++) {
+      boardEl.appendChild(buildCard(OFFERS[i]));
+    }
+    var bare = OFFERS.length === 0;
+    boardEl.hidden = bare;
+    emptyEl.hidden = !bare;
+    if (bare) { redrawWired(emptyEl); }
+    toggleBtn.textContent = bare ? 'put the board back' : 'empty the board';
+    refreshCounts();
+  }
+
+  /* ── Pinning up a new offer ── */
+  var EMOJI = [
+    [/fava|broad bean|bean/i, '🫘'],
+    [/pea\b|peas/i, '🫛'],
+    [/tomat/i, '🍅'],
+    [/basil|mint|thyme|oregano|parsley|herb|coriander/i, '🌿'],
+    [/chard|lettuce|spinach|kale|rocket|salad|cabbage/i, '🥬'],
+    [/sunflower/i, '🌻'],
+    [/calendula|marigold|cosmos|poppy|nasturtium|flower/i, '🌼'],
+    [/pumpkin|squash|zucchini|courgette/i, '🎃'],
+    [/pepper|chilli|chili/i, '🌶️'],
+    [/cucumber/i, '🥒'],
+    [/garlic|onion|leek/i, '🧄'],
+    [/carrot/i, '🥕'],
+    [/corn|maize/i, '🌽']
+  ];
+
+  function emojiFor(name) {
+    for (var i = 0; i < EMOJI.length; i++) {
+      if (EMOJI[i][0].test(name)) { return EMOJI[i][1]; }
+    }
+    return '🌱';
+  }
+
+  /* The button borrows whatever words you used for the amount. */
+  var TAKE = [
+    [/handful/i, 'Claim a handful'],
+    [/pinch/i, 'Claim a pinch'],
+    [/jar|glass/i, 'Claim the jar'],
+    [/envelope|packet|sachet|paper/i, 'Claim the envelope'],
+    [/bag|sack/i, 'Claim the bag'],
+    [/box|tin/i, 'Claim the tin'],
+    [/pod|head|spike/i, 'Claim a few'],
+    [/scoop|spoon/i, 'Claim a scoop'],
+    [/seed|\d/i, 'Claim the envelope']
+  ];
+
+  function takeFor(amount) {
+    for (var i = 0; i < TAKE.length; i++) {
+      if (TAKE[i][0].test(amount)) { return TAKE[i][1]; }
+    }
+    return 'Claim some';
+  }
+
+  function openForm() {
+    formEl.hidden = false;
+    redrawWired(formEl);
+    formEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function closeForm() {
+    formEl.hidden = true;
+    errorEl.hidden = true;
+  }
+
+  function pinItUp() {
+    var crop = String(cropInput.value || '').trim();
+    var amount = String(amountInput.value || '').trim();
+    if (!crop || !amount) {
+      errorEl.hidden = false;
+      return;
+    }
+    errorEl.hidden = true;
+
+    var fresh = {
+      id: 'own-' + OFFERS.length + '-' + crop.replace(/[^a-z0-9]/gi, '').toLowerCase(),
+      emoji: emojiFor(crop),
+      crop: crop,
+      amount: amount,
+      plot: ME.plot,
+      by: ME.name,
+      initial: ME.initial,
+      color: ME.color,
+      when: 'just now',
+      note: String(noteInput.value || '').trim() || 'No notes, just seeds.',
+      take: takeFor(amount),
+      claimedBy: null,
+      mine: true,
+      isNew: true
+    };
+    OFFERS.unshift(fresh);
+
+    cropInput.value = '';
+    amountInput.value = '';
+    noteInput.value = '';
+    closeForm();
+    render();
+    setTimeout(function () { fresh.isNew = false; }, 1800);
+  }
+
+  document.getElementById('offer-open').addEventListener('click', openForm);
+  document.getElementById('empty-offer').addEventListener('click', openForm);
+  document.getElementById('offer-cancel').addEventListener('click', closeForm);
+  document.getElementById('offer-submit').addEventListener('click', pinItUp);
+  cropInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { pinItUp(); }
+  });
+  amountInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { pinItUp(); }
+  });
+
+  /* ── Scaffolding: swing the board between full and bare ── */
+  var stash = null;
+  var toggleBtn = document.getElementById('toggle-empty');
+  toggleBtn.addEventListener('click', function () {
+    if (OFFERS.length) {
+      stash = OFFERS.slice();
+      OFFERS.length = 0;
+    } else if (stash) {
+      for (var i = 0; i < stash.length; i++) { OFFERS.push(stash[i]); }
+      stash = null;
+    }
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
