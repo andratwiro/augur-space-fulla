@@ -6,5 +6,7 @@
   "garden/seed-pod-3d": "dev-ready",
   "garden/seed-swap": "in-progress",
   "almanac/sowing-wheel": "dev-ready",
-  "signage/plot-sign": "in-progress"
+  "signage/plot-sign": "in-progress",
+  "toolshed/tool-board": "dev-ready",
+  "waitlist/queue-postcard": "in-progress"
 }

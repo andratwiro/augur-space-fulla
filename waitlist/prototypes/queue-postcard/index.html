@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The card posted to everyone on the waitlist each season, telling them where they stand and what happens next.">
+<title>Fulla · Queue postcard</title>
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-tokens.css">
+<link rel="stylesheet" href="../../../skills/fulla-ui/fulla-ui.css">
+<script src="../../../skills/fulla-ui/vendor/wired-elements.js"></script>
+<style>
+  /* ── Prototype-local styles (a physical postcard, 148 x 105) ── */
+
+  .cards { display: flex; gap: var(--fulla-s6); flex-wrap: wrap; align-items: flex-start; }
+
+  .pc {
+    width: 29.6rem; height: 21rem;      /* 148 x 105 at 2mm per 0.1rem */
+    background: var(--fulla-white);
+    border: var(--fulla-border);
+    box-shadow: var(--fulla-shadow-lg);
+    padding: var(--fulla-s5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;   /* it is a physical card: nothing prints outside it */
+  }
+  .pc__label { font-size: var(--fulla-text-xs); }
+
+  /* Front: the number is the whole message. */
+  .pc--front { align-items: center; justify-content: center; text-align: center; gap: var(--fulla-s2);
+    background:
+      radial-gradient(circle at 18% 22%, rgba(167,196,160,.35) 0 22%, transparent 23%),
+      radial-gradient(circle at 84% 78%, rgba(230,170,58,.22) 0 18%, transparent 19%),
+      var(--fulla-white); }
+  .pc__num { font-family: var(--fulla-font-display); font-weight: 800;
+    font-size: 6.5rem; line-height: .9; color: var(--fulla-green-deep); }
+  .pc__of { font-family: var(--fulla-font-display); color: var(--fulla-ink-soft);
+    font-size: var(--fulla-text-lg); }
+
+  /* Back: message left, address right, the way a real card is ruled. */
+  .pc--back { flex-direction: row; gap: var(--fulla-s5); }
+  .pc__msg { flex: 1.15; font-family: var(--fulla-font-display); font-size: 0.82rem;
+    line-height: 1.45; border-right: 2px dashed var(--fulla-ink-faint); padding-right: var(--fulla-s5); }
+  .pc__addr { flex: 1; display: flex; flex-direction: column; }
+  .pc__stamp { align-self: flex-end; width: 4.6rem; height: 5.6rem;
+    border: 2px dashed var(--fulla-ink-faint); border-radius: var(--fulla-wobble-sm);
+    display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+  .pc__lines { margin-top: auto; }
+  .pc__line { border-bottom: 2px dashed var(--fulla-ink-faint); height: 1.9rem; }
+  .pc__to { font-family: var(--fulla-font-display); color: var(--fulla-ink);
+    position: relative; top: 1.35rem; }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: var(--fulla-white); }
+    .pc { box-shadow: none; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body data-gv-screen="postcard">
+
+<main class="f-page">
+
+  <div class="f-row f-between f-wrap no-print" style="margin-bottom: var(--fulla-s5)">
+    <div>
+      <h1>Queue postcard</h1>
+      <p class="f-muted" style="margin:0">
+        Nine people are waiting for a plot and most of them never hear anything until one opens.
+        This is the card that goes out each season so they know they are still in the queue.
+      </p>
+    </div>
+    <wired-button class="f-primary" onclick="window.print()">Print the batch</wired-button>
+  </div>
+
+  <div class="f-card f-card--soft no-print f-row f-wrap" style="margin-bottom: var(--fulla-s6)">
+    <strong>Preview for</strong>
+    <span id="picker" class="f-row f-wrap"></span>
+  </div>
+
+  <div class="cards">
+    <div>
+      <div class="pc pc--front">
+        <div class="f-logo" style="font-size: var(--fulla-text-lg)">fulla<span class="f-leaf">🌿</span></div>
+        <div class="pc__num" id="num">4th</div>
+        <div class="pc__of" id="of">in line for a plot</div>
+        <div class="f-muted" style="font-size: var(--fulla-text-sm)">Hort de la Riera · autumn 2026</div>
+      </div>
+      <div class="f-faint pc__label" style="margin-top: var(--fulla-s2)">Front</div>
+    </div>
+
+    <div>
+      <div class="pc pc--back">
+        <div class="pc__msg" id="msg"></div>
+        <div class="pc__addr">
+          <div class="pc__stamp">🌿</div>
+          <div class="pc__lines">
+            <div class="pc__line"><span class="pc__to" id="to">Berta Ripoll</span></div>
+            <div class="pc__line"></div>
+            <div class="pc__line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="f-faint pc__label" style="margin-top: var(--fulla-s2)">Back</div>
+    </div>
+  </div>
+
+  <div class="f-card no-print" style="margin-top: var(--fulla-s6); max-width: 46rem">
+    <h4 style="margin:0 0 var(--fulla-s2)">Why this exists</h4>
+    <p class="f-muted" style="margin:0">
+      Three of nine waitlisters gave up before a plot opened, and none of them had ever been
+      told where they stood. A card twice a year costs about nine stamps.
+    </p>
+  </div>
+
+</main>
+
+<script>
+// One entry per person on the list. The first in line reads differently from the
+// rest, because for them the card is not a wait, it is the offer.
+var PEOPLE = [
+  { name: "Quim Batlle",  pos: 1, of: "your plot is ready",
+    msg: "Hola Quim,<br><br>Plot 40, The New Bed, is yours if you still want it. " +
+         "It is the sunniest one we have.<br><br>" +
+         "Come by any Saturday and we will walk it together.<br><br>Núria" },
+  { name: "Berta Ripoll", pos: 4, of: "in line for a plot",
+    msg: "Hola Berta,<br><br>You moved up two places this season. Two plots changed hands " +
+         "after the summer, and one more opens in spring.<br><br>" +
+         "Nothing to do for now. Saturday mornings are communal if you want to meet " +
+         "the garden first.<br><br>Núria" },
+  { name: "Rosa Miquel",  pos: 7, of: "in line for a plot",
+    msg: "Hola Rosa,<br><br>Still on the list, and you moved up one. It will honestly be " +
+         "a while, so I would rather say so than leave you guessing.<br><br>" +
+         "The communal beds always need hands, and that counts as garden time.<br><br>Núria" }
+];
+
+var ORD = { 1: "1st", 4: "4th", 7: "7th" };
+
+var num = document.getElementById("num");
+var of = document.getElementById("of");
+var msg = document.getElementById("msg");
+var to = document.getElementById("to");
+var picker = document.getElementById("picker");
+
+function show(i) {
+  var p = PEOPLE[i];
+  num.textContent = ORD[p.pos] || p.pos;
+  of.textContent = p.of;
+  msg.innerHTML = p.msg;
+  to.textContent = p.name;
+  var btns = picker.querySelectorAll("wired-button");
+  for (var b = 0; b < btns.length; b++) {
+    btns[b].className = (b === i) ? "f-primary" : "";
+  }
+}
+
+PEOPLE.forEach(function (p, i) {
+  var btn = document.createElement("wired-button");
+  btn.textContent = p.name.split(" ")[0] + " (" + (ORD[p.pos] || p.pos) + ")";
+  btn.addEventListener("click", function () { show(i); });
+  picker.appendChild(btn);
+});
+
+show(1);
+</script>
+
+</body>
+</html>
