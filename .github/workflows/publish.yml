@@ -1,0 +1,105 @@
+# Push to main → this space is live in about a minute. No publish command to run and
+# none to forget.
+#
+# Why this exists at all: in Augur a push and a publish are different acts. A push
+# records content in git; a PUBLISH is what puts it in front of visitors, and until
+# someone runs it the live site quietly lags the repo — everybody's own clone looks
+# right, so nobody notices. That gap is fine for a working space where a person is
+# already at their terminal. For this one it is not: it is a public demo whose whole
+# job is to show what the repo contains, and the person who last pushed is often not
+# the person who would have remembered to publish.
+#
+# So the two acts are joined HERE, in the space repo, rather than in the deploy shell.
+# The shell's own CI is structurally forbidden to ship content (it builds with
+# GV_ENGINE_ONLY=1 and the build asserts nothing space-derived came out), and that
+# guarantee is worth keeping — one source of content, by construction. This job is not
+# an exception to it: it runs the ordinary `augur publish` client with an ordinary
+# publish token, exactly as a person at a terminal would. Same door, no key under the
+# mat.
+#
+# ── SETUP (one secret, once) ────────────────────────────────────────────────────
+# AUGUR_TOKEN — a publish token scoped to THIS space, minted on the instance:
+#   1. sign in to the site in space.json `siteOrigin` as an admin
+#   2. Admin → Tokens → mint one for this space (label it so a revoke is obvious)
+#   3. gh secret set AUGUR_TOKEN -R <owner>/<this repo>
+# Scope it to this space, not "*": this repo is public, and a star-scope token in a
+# public repo's CI can write every space on the instance. Fork pull requests never
+# receive it — that is why the triggers below are push and manual dispatch only, and
+# why pull_request must not be added.
+#
+# The target is NOT configured here. It comes from space.json `siteOrigin`, the one
+# public fact a space repo knows about its instance — so a fork that repoints its
+# space.json publishes to its own site and this file needs no edit.
+name: Publish to the live site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Build and diff against live, ship nothing"
+        type: boolean
+        default: false
+
+# Newest push wins. Cancelling is safe: a publish commits atomically at the end, so an
+# interrupted run ships nothing at all, and the run that replaces it carries a tree
+# that already includes whatever the cancelled one was going to send.
+concurrency:
+  group: publish
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 is load-bearing, not caution. publish.mjs REFUSES a shallow
+      # clone, because it reads each file's git history to date the cards and credit
+      # the editor — from a shallow one every prototype would look like it was written
+      # the moment CI cloned it, and the whole gallery would show one timestamp.
+      - name: Check out this space
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: space
+
+      # The engine is public and carries no runtime dependencies, so there is nothing
+      # to install. main, not a tag: this instance tracks the engine's main (see the
+      # shell's engine-bump.yml), and content should be built by the engine that will
+      # be serving it.
+      - name: Check out the engine
+        uses: actions/checkout@v4
+        with:
+          repository: andratwiro/augur
+          ref: main
+          path: engine
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - name: Fail early if the publish token is missing
+        env:
+          AUGUR_TOKEN: ${{ secrets.AUGUR_TOKEN }}
+        run: |
+          if [ -z "$AUGUR_TOKEN" ]; then
+            echo "::error::AUGUR_TOKEN is not set — see the setup notes at the top of this workflow."
+            exit 1
+          fi
+
+      # GV_SPACES_ROOT points AT this space rather than at a parent folder. Left to
+      # its default the build would look for a spaces/ dir beside the engine, find
+      # nothing, and fail; pointed at a parent it would mount this space under /<id>/
+      # instead of at the root if anything else were ever checked out beside it.
+      # Naming the one space is what makes the mount point deterministic.
+      #
+      # No AUGUR_ORIGIN: with no deploy shell on disk the origin resolves to
+      # space.json `siteOrigin`, which is what we want it to be.
+      - name: Publish
+        working-directory: space
+        env:
+          AUGUR_TOKEN: ${{ secrets.AUGUR_TOKEN }}
+          GV_SPACES_ROOT: ${{ github.workspace }}/space
+        run: node ../engine/scripts/publish.mjs ${{ inputs.dry-run && '--dry-run' || '' }}
