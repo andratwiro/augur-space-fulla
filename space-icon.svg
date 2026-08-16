@@ -1,0 +1,15 @@
+<!-- Fulla's workspace icon — the source of truth for space-icon.png.
+
+     Full-bleed and square on purpose: Augur clips this itself, with its own
+     border-radius over a white backdrop, in both places it renders (5px at
+     20x20 in the space rail, 12px at 56x56 in workspace settings). Baking
+     corners in here would only leave transparent slivers showing that white.
+
+     Colours are Fulla's own tokens: green-deep #35593f, paper #faf6ec,
+     sprout #7fb069. Regenerate the PNG at 512x512 after any edit. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512">
+  <rect width="64" height="64" fill="#35593f"/>
+  <path d="M32 12C45.5 22.5 45.5 41.5 32 52C18.5 41.5 18.5 22.5 32 12Z" fill="#faf6ec"/>
+  <path d="M32 12C45.5 22.5 45.5 41.5 32 52Z" fill="#7fb069" opacity=".7"/>
+  <path d="M32 14V50" stroke="#35593f" stroke-width="2.4" stroke-linecap="round"/>
+</svg>
