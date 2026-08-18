@@ -1,0 +1,69 @@
+# Nightly poster refresh. Re-shoots the WebP card posters for any prototype whose
+# source changed (or that has no poster yet), commits them, and pushes — which trips
+# publish.yml, so a fresh poster is live within a minute. Keeps galleries image-only:
+# a card never falls back to booting a live prototype iframe (the biggest avoidable
+# gallery cost — see the engine's docs/service-worker.md and scripts/shoot.mjs).
+#
+# --stale only reshoots what actually changed, so a quiet day is a near-no-op and a
+# day with edits refreshes exactly those cards. Manual dispatch for an on-demand run.
+name: Refresh posters (nightly)
+
+on:
+  schedule:
+    - cron: "17 4 * * *" # 04:17 UTC daily
+  workflow_dispatch: {}
+
+concurrency:
+  group: posters
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  posters:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this space
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: space
+
+      - name: Check out the engine
+        uses: actions/checkout@v4
+        with:
+          repository: andratwiro/augur
+          ref: main
+          path: engine
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - name: Install cwebp
+        run: sudo apt-get update && sudo apt-get install -y webp
+
+      - name: Install Playwright Chromium
+        working-directory: engine
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Reshoot changed posters
+        env:
+          GV_SPACES_ROOT: ${{ github.workspace }}/space
+        run: node engine/scripts/shoot.mjs --stale
+
+      - name: Commit & push any refreshed posters
+        working-directory: space
+        run: |
+          if [ -z "$(git status --porcelain -- '*preview.webp')" ]; then
+            echo "No poster changes — nothing to do."
+            exit 0
+          fi
+          git config user.name  "augur-posters[bot]"
+          git config user.email "augur-posters@users.noreply.github.com"
+          git add -- '*preview.webp'
+          git commit -m "Posters: nightly reshoot of changed cards"
+          git push
+          echo "Pushed refreshed posters → publish.yml will ship them."
