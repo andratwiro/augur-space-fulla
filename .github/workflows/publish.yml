@@ -22,6 +22,8 @@
 #   1. sign in to the site in space.json `siteOrigin` as an admin
 #   2. Admin → Tokens → mint one for this space (label it so a revoke is obvious)
 #   3. gh secret set AUGUR_TOKEN -R <owner>/<this repo>
+#   4. run this workflow with dry-run: true — it builds and diffs against live and
+#      ships nothing, so a green run proves the secret without touching the site
 # Scope it to this space, not "*": this repo is public, and a star-scope token in a
 # public repo's CI can write every space on the instance. Fork pull requests never
 # receive it — that is why the triggers below are push and manual dispatch only, and
